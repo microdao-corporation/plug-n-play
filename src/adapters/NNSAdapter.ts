@@ -148,7 +148,7 @@ export class NNSAdapter extends AdapterInterface {
     return identity.getPrincipal().toString();
   }
 
-  isConnected(): boolean {
-    return this.authClient !== null && this.agent !== null;
+  async isConnected(): Promise<boolean> {
+    return await this.authClient.isAuthenticated();
   }
 }

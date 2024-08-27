@@ -43,7 +43,7 @@ export abstract class AdapterInterface {
 
   abstract getPrincipal(): Promise<string|boolean>;
 
-  abstract isConnected(): boolean;
+  abstract isConnected(): Promise<boolean>;
 
   abstract whoAmI(): Promise<string>;
 }
