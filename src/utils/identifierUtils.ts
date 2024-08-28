@@ -9,7 +9,6 @@ declare global {
   }
 }
 
-// @ts-ignore
 window.Buffer = Buffer;
 
 const SUB_ACCOUNT_ZERO = Buffer.alloc(32);

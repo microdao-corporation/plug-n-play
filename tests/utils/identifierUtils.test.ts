@@ -24,6 +24,7 @@ describe('Token and Account Identifier Utilities', () => {
       const principalId = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
       const accountId = getAccountIdentifier(principalId);
       expect(typeof accountId).toBe('string');
+      // @ts-ignore
       expect(accountId!.length).toBe(64);
     });
 
@@ -32,6 +33,7 @@ describe('Token and Account Identifier Utilities', () => {
       const subAccount = 1;
       const accountId = getAccountIdentifier(principalId, subAccount);
       expect(typeof accountId).toBe('string');
+      // @ts-ignore
       expect(accountId!.length).toBe(64);
     });
 
