@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x, 18.x, 20.x, 21.x, 22.x]
+        node-version: [18.x, 20.x, 21.x, 22.x]
 
     steps:
       - name: Checkout code
@@ -24,29 +24,30 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 9
+          run_install: false  # Skip automatic install to use manual command
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: pnpm
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Run Vitest
-        run: npm run test
+        run: pnpm run test
 
       - name: Upload Test Artifacts
         if: failure()
         uses: actions/upload-artifact@v3
         with:
           name: test-results
-          path: ./
+          path: ./  # Make sure this path contains the results
 
       - name: Upload Coverage Report
         if: success()
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
-          path: ./coverage
+          path: ./coverage  # Ensure this path exists after tests run
