@@ -1,13 +1,17 @@
 import { defineConfig } from 'vite';
 import path from 'path';
+import dts from 'vite-plugin-dts';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig({
   build: {
+    logLevel: 'debug',
+    sourcemap: true,
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
       name: 'PlugNPlay',
       formats: ['es', 'umd'],
-      fileName: (format) => `plug-n-play.${format}.js`
+      fileName: (format) => `plug-n-play.${format}.js`,
     },
     rollupOptions: {
       external: [
@@ -19,7 +23,7 @@ export default defineConfig({
         '@dfinity/agent',
         '@dfinity/identity',
         '@fort-major/msq-client',
-        '@fort-major/msq-shared'
+        '@fort-major/msq-shared',
       ],
       output: {
         globals: {
@@ -31,12 +35,16 @@ export default defineConfig({
           '@dfinity/agent': 'dfinity.agent',
           '@dfinity/identity': 'dfinity.identity',
           '@fort-major/msq-client': 'fortMajor.msqClient',
-          '@fort-major/msq-shared': 'fortMajor.msqShared'
-        }
-      }
+          '@fort-major/msq-shared': 'fortMajor.msqShared',
+        },
+      },
     },
     outDir: 'dist',
     emptyOutDir: true,
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
@@ -47,4 +55,17 @@ export default defineConfig({
       'node:buffer': 'buffer',
     },
   },
+  plugins: [
+    dts({
+      insertTypesEntry: true,
+    }),
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'assets/*',
+          dest: 'assets',
+        },
+      ],
+    }),
+  ],
 });

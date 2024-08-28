@@ -1,9 +1,9 @@
-import { AdapterInterface, Account, AdapterConfig, TransferParams } from "./AdapterInterface";
 import { Actor, HttpAgent, ActorSubclass } from "@dfinity/agent";
-import { getAccountIdentifier } from "../utils/identifierUtils";
+import { getAccountIdentifier } from "../utils/identifierUtils.js";
 import { AuthClient } from "@dfinity/auth-client";
+import { Wallet } from '../../types';
 
-export class NNSAdapter extends AdapterInterface {
+export class NNSAdapter implements Wallet.AdapterInterface {
   name: string;
   logo: string;
   readyState: string;
@@ -12,7 +12,6 @@ export class NNSAdapter extends AdapterInterface {
   private agent: HttpAgent | null;
 
   constructor() {
-    super();
     this.name = "NNS";
     this.logo = "path_to_nns_logo.svg";
     this.readyState = "Loadable";
@@ -28,7 +27,7 @@ export class NNSAdapter extends AdapterInterface {
     return true;
   }
 
-  async connect(config: AdapterConfig): Promise<Account> {
+  async connect(config: Wallet.AdapterConfig): Promise<Wallet.Account> {
     if (!this.authClient) {
       this.authClient = await AuthClient.create();
     }
@@ -36,7 +35,7 @@ export class NNSAdapter extends AdapterInterface {
     const isConnected = await this.authClient.isAuthenticated();
     
     if (!isConnected) {
-      return new Promise<Account>((resolve, reject) => {
+      return new Promise<Wallet.Account>((resolve, reject) => {
         this.authClient!.login({
           identityProvider: config.identityProvider || this.url,
           onSuccess: async () => {
@@ -58,7 +57,7 @@ export class NNSAdapter extends AdapterInterface {
     }
   }
 
-  private async _continueLogin(host: string): Promise<Account> {
+  private async _continueLogin(host: string): Promise<Wallet.Account> {
     try {
       const identity = this.authClient!.getIdentity();
       const principal = identity.getPrincipal();  
@@ -84,9 +83,10 @@ export class NNSAdapter extends AdapterInterface {
 
   async disconnect(): Promise<void> {
     if (this.authClient) {
-      await this.authClient.logout();
       this.readyState = "Loadable";
       this.agent = null;
+      await this.authClient.logout();
+      this.authClient = null;
     }
   }
 
@@ -131,12 +131,11 @@ export class NNSAdapter extends AdapterInterface {
     return identity.getPrincipal().toString();
   }
 
-  // Implement these methods to satisfy the interface
   async getBalance(): Promise<bigint> {
     throw new Error("Method not implemented.");
   }
 
-  async transfer(params: TransferParams): Promise<void> {
+  async transfer(params: Wallet.TransferParams): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
@@ -148,7 +147,7 @@ export class NNSAdapter extends AdapterInterface {
     return identity.getPrincipal().toString();
   }
 
-  async isConnected(): Promise<boolean> {
-    return await this.authClient.isAuthenticated();
+  async isConnected(): Promise<boolean|undefined> {
+    return await this.authClient?.isAuthenticated();
   }
 }
