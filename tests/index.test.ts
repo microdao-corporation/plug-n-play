@@ -1,26 +1,26 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AnonymousIdentity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
-import { HOSTURL, NNS_CANISTER_ID } from '../constants';
-import { BatchTransact } from '../utils/batchTransact';
+import { HOSTURL, NNS_CANISTER_ID } from '../src/constants';
+import { BatchTransact } from '../src/utils/batchTransact';
 
 // Mock the core PnP class with a spy
 const PnP = vi.fn().mockImplementation(() => {
   return { mock: 'PnP instance' };
 });
 
-vi.mock('../index', () => {
+vi.mock('../src/index', () => {
   return {
     default: PnP
   };
 });
 
 describe('index.ts', () => {
-  let indexModule: typeof import('../../index');
+  let indexModule: typeof import('../index');
 
   beforeEach(async () => {
     vi.resetModules();
-    indexModule = await import('../../index');
+    indexModule = await import('../index');
   });
 
   it('should export PnP', () => {
@@ -60,7 +60,7 @@ describe('index.ts', () => {
       } as any;
 
       // Import the module again to reassign window.pnp
-      indexModule = await import('../../index');
+      indexModule = await import('../index');
     });
 
     afterEach(() => {
