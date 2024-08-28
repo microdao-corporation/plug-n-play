@@ -1,4 +1,6 @@
-export { Wallet, ICRC } from "../../types";
+// src/utils/agentUtils.ts
+
+import { Wallet, ICRC } from '../../types';
 import { HttpAgent, HttpAgentOptions } from '@dfinity/agent';
 
 export function createHttpAgent(options: HttpAgentOptions): HttpAgent {
@@ -11,7 +13,7 @@ export function createHttpAgent(options: HttpAgentOptions): HttpAgent {
   return new HttpAgent(options);
 }
 
-export function fetchRootKey(agent: HttpAgent): Promise<void | ArrayBuffer> {
+export async function fetchRootKey(agent: HttpAgent): Promise<void | ArrayBuffer> {
   return agent.fetchRootKey().catch(err => {
     console.warn("Unable to fetch root key. Check to ensure that your local replica is running");
     console.error(err);

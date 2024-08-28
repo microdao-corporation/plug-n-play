@@ -1,5 +1,5 @@
 // src/adapters/Template.template.js
-import { Wallet } from '../../types';
+import { Wallet, ICRC } from '../../types';
 
 export class TemplateAdapter extends Wallet.AdapterInterface {
   name: string;
