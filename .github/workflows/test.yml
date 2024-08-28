@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x, 18.x]
+        node-version: [16.x, 18.x, 20.x, 21.x, 22.x]
 
     steps:
       - name: Checkout code
@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: pnpm
 
       - name: Install dependencies
         run: npm install
@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: test-results
-          path: ./path-to-your-test-results-directory
+          path: ./
 
       - name: Upload Coverage Report
         if: success()
