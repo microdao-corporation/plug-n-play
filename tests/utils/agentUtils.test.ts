@@ -3,9 +3,9 @@ import { HttpAgent } from '@dfinity/agent';
 import * as agentUtils from '../../src/utils/agentUtils';
 
 vi.mock('@dfinity/agent', () => ({
-  HttpAgent: vi.fn().mockImplementation(function (options) {
-    this.options = options;
-    this.fetchRootKey = vi.fn().mockResolvedValue(undefined); // Return a resolved promise
+  HttpAgent: vi.fn().mockImplementation(function (this: any, options: any) {
+      this.options = options;
+      this.fetchRootKey = vi.fn().mockResolvedValue(undefined); // Return a resolved promise
   }),
 }));
 
