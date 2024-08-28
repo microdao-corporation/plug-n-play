@@ -1,10 +1,5 @@
-import { HttpAgent } from '@dfinity/agent';
-
-interface HttpAgentOptions {
-  identity?: any;
-  host?: string;
-  [key: string]: any; // Allow for additional options
-}
+export { Wallet, ICRC } from "../../types";
+import { HttpAgent, HttpAgentOptions } from '@dfinity/agent';
 
 export function createHttpAgent(options: HttpAgentOptions): HttpAgent {
   // Check if createSync exists on HttpAgent

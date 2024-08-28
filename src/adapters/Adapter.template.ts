@@ -1,18 +1,18 @@
 // src/adapters/Template.template.js
+import { Wallet } from '../../types';
 
-import { AdapterInterface, Account, AdapterConfig, TransferParams } from "./AdapterInterface";
-
-export class TemplateAdapter extends AdapterInterface {
+export class TemplateAdapter extends Wallet.AdapterInterface {
   name: string;
   logo: string;
   readyState: string;
   url: string;
   constructor() {
-    super();
-    this.name = 'Template';
-    this.logo = 'path_to_template_logo.svg';
-    this.readyState = "NotDetected";
-    this.url = "https://template.com/";
+      const url = ''; // Add a default value for the 'url' property
+      super(url);
+      this.url = url;
+      this.name = 'Template';
+      this.logo = 'path_to_template_logo.svg';
+      this.readyState = "NotDetected";
   }
 
   disconnect(): Promise<void> {
@@ -21,7 +21,7 @@ export class TemplateAdapter extends AdapterInterface {
   getBalance(): Promise<bigint> {
     throw new Error("Method not implemented.");
   }
-  transfer(params: TransferParams): Promise<void> {
+  transfer(params: Wallet.TransferParams): Promise<void> {
     throw new Error("Method not implemented.");
   }
   createActor<T>(canisterId: string, idl: any): Promise<T> {
@@ -43,7 +43,7 @@ export class TemplateAdapter extends AdapterInterface {
     return false;
   }
 
-  async connect(config): Promise<Account> {
+  async connect(_config: Wallet.AdapterConfig): Promise<Wallet.Account> {
     return {
       accountId: "",
       principalId: ""

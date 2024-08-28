@@ -1,39 +1,7 @@
-import { AdapterInterface, Account, AdapterConfig, TransferParams } from './AdapterInterface';
 import { ActorSubclass } from '@dfinity/agent';
+import { Wallet } from '../../types';
 
-// Define the shape of the ic.plug object
-interface ICPlug {
-  isConnected: () => Promise<boolean>;
-  requestConnect: (options: {
-    whitelist: string[];
-    host: string;
-    timeout?: number;
-    onConnectionUpdate: () => void;
-  }) => Promise<string>;
-  createAgent: (options: { whitelist: string[]; host: string }) => Promise<void>;
-  agent: {
-    getPrincipal: () => Promise<{ toString: () => string }>;
-  };
-  accountId: string;
-  disconnect: () => Promise<void>;
-  requestTransfer: (params: TransferParams) => Promise<any>;
-  createActor: (options: { canisterId: string; interfaceFactory: any }) => Promise<ActorSubclass<any>>;
-  principalId: string;
-  requestTransferToken: (params: any) => Promise<any>;
-  requestBurnXTC: (params: any) => Promise<any>;
-  batchTransactions: (transactions: any[]) => Promise<any>;
-}
-
-// Extend the global Window interface
-declare global {
-  interface Window {
-    ic?: {
-      plug?: ICPlug;
-    };
-  }
-}
-
-export class PlugAdapter extends AdapterInterface {
+export class PlugAdapter implements Wallet.AdapterInterface {
   getBalance(): Promise<bigint> {
     throw new Error('Method not implemented.');
   }
@@ -49,7 +17,6 @@ export class PlugAdapter extends AdapterInterface {
   url: string;
 
   constructor() {
-    super();
     this.name = 'Plug';
     this.logo = 'path_to_plug_logo.svg';
     this.readyState = "NotDetected";
@@ -60,7 +27,7 @@ export class PlugAdapter extends AdapterInterface {
     return !!(window.ic && window.ic.plug);
   }
 
-  async connect(config: AdapterConfig): Promise<Account> {
+  async connect(config: Wallet.AdapterConfig): Promise<Wallet.Account> {
     if (!await this.isAvailable()) {
       this.readyState = "NotDetected";
       window.open(this.url, "_blank");
@@ -111,7 +78,7 @@ export class PlugAdapter extends AdapterInterface {
     }
   }
 
-  async transfer(params: TransferParams): Promise<any> {
+  async transfer(params: Wallet.TransferParams): Promise<any> {
     if (!window.ic || !window.ic.plug) {
       throw new Error("Plug wallet is not installed or initialized");
     }
