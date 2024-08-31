@@ -6657,8 +6657,8 @@ class gt {
   async isConnected() {
     return await window.ic.plug.isConnected();
   }
-  async createActor(h, o) {
-    return window.ic.plug.createActor(h, o);
+  async createActor(h) {
+    return window.ic.plug.createActor(h);
   }
   async requestBalance() {
     return window.ic.plug.requestBalance();
@@ -6702,8 +6702,10 @@ class gt {
   }
   async icrc1_transfer(h, o) {
     await this.createActor(
-      h.toString(),
-      Cr
+      {
+        canisterId: h.toString(),
+        interfaceFactory: Cr
+      }
     ).icrc1_transfer(h, o);
   }
   async whoAmI() {

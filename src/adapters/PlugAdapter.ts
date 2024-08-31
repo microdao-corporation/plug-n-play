@@ -111,6 +111,7 @@ export class PlugAdapter implements Wallet.PlugInterface {
       interfaceFactory: ICRC1_IDL
     }
     );
+    // @ts-ignore
     await icrcActor.icrc1_transfer(canisterId, params);
   }
 

@@ -10,7 +10,10 @@ export declare class PlugAdapter implements Wallet.PlugInterface {
     isAvailable(): Promise<boolean>;
     requestConnect(params: any): Promise<any>;
     isConnected(): Promise<boolean>;
-    createActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>>;
+    createActor<T>(options: {
+        canisterId: string;
+        interfaceFactory: any;
+    }): Promise<ActorSubclass<T>>;
     requestBalance(): Promise<Array<{
         amount: number;
         currency: string;

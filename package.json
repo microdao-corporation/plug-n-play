@@ -9,7 +9,7 @@
     ".": {
       "import": "./dist/plug-n-play.es.js",
       "require": "./dist/plug-n-play.umd.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/types.d.ts"
     }
   },
   "files": [

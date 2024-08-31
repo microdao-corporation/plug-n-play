@@ -4,7 +4,7 @@
     "module": "ESNext",
     "lib": ["ES2020", "DOM"],
     "declaration": true,
-    "declarationDir": "./types",
+    "declarationDir": "./dist/types",
     "typeRoots": ["./node_modules/@types", "./types"],
     "outDir": "./dist",
     "strict": false,
