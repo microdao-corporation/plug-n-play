@@ -45,8 +45,8 @@ export class PlugAdapter implements Wallet.PlugInterface {
     return await window.ic!.plug!.isConnected();
   }
 
-  async createActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>> {
-    return window.ic!.plug!.createActor(canisterId, idl);
+  async createActor<T>(options: { canisterId: string; interfaceFactory: any; }): Promise<ActorSubclass<T>> {
+    return window.ic!.plug!.createActor(options);
   }
 
   async requestBalance(): Promise<Array<{ amount: number, currency: string, image: string, name: string, value: number }>> {
@@ -106,9 +106,10 @@ export class PlugAdapter implements Wallet.PlugInterface {
   }
 
   async icrc1_transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<void> {
-    const icrcActor = this.createActor(
-      canisterId.toString(),
-    ICRC1_IDL,
+    const icrcActor = this.createActor({
+      canisterId: canisterId.toString(),
+      interfaceFactory: ICRC1_IDL
+    }
     );
     await icrcActor.icrc1_transfer(canisterId, params);
   }
