@@ -3,14 +3,14 @@ import { NNSAdapter } from "./src/adapters/NNSAdapter";
 import { PlugAdapter } from "./src/adapters/PlugAdapter";
 import { BitfinityAdapter } from "./src/adapters/BitfinityAdapter";
 import { BatchTransact } from "./src/utils/batchTransact";
-import { AnonymousIdentity } from "@dfinity/agent";
+import { AnonymousIdentity, HttpAgent } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 import { ActorSubclass } from "@dfinity/agent";
 import { P } from "vitest/dist/chunks/environment.0M5R1SX_";
 
-declare module '*.jpg';
-declare module '*.jpeg';
-declare module '*.svg';
+declare module "*.jpg";
+declare module "*.jpeg";
+declare module "*.svg";
 
 export namespace Wallet {
   export interface PnPConfig {
@@ -89,13 +89,27 @@ export namespace Wallet {
   export interface PlugInterface {
     requestConnect: (params: any) => Promise<any>;
     isConnected: () => Promise<boolean>;
-    createActor: <T>(options: { canisterId: string; interfaceFactory: any }) => Promise<ActorSubclass<T>>;
-    requestBalance: () => Promise<Array<{ amount: number, currency: string, image: string, name: string, value: number }>>;
+    createActor: <T>(options: {
+      canisterId: string;
+      interfaceFactory: any;
+    }) => Promise<ActorSubclass<T>>;
+    requestBalance: () => Promise<
+      Array<{
+        amount: number;
+        currency: string;
+        image: string;
+        name: string;
+        value: number;
+      }>
+    >;
     requestTransfer: (params: TransferParams) => Promise<{ height: number }>;
     requestTransferToken: (params: any) => Promise<any>;
-    requestBurnXTC: (params: { to: string, amount: number }) => Promise<any>;
+    requestBurnXTC: (params: { to: string; amount: number }) => Promise<any>;
     batchTransactions: (transactions: Transaction.Item[]) => Promise<any>;
-    createAgent: (options?: { whitelist: string[], host?: string }) => Promise<void>;
+    createAgent: (options?: {
+      whitelist: string[];
+      host?: string;
+    }) => Promise<void>;
     disconnect: () => Promise<void>;
     getAccountId: () => string;
     getPrincipal: () => Principal;
@@ -104,7 +118,10 @@ export namespace Wallet {
   // Bitfinity-specific methods
   export interface BitfinityInterface {
     getUserAssets: () => Promise<any>;
-    batchTransactions: (transactions: any[], options?: { host?: string }) => Promise<void>;
+    batchTransactions: (
+      transactions: any[],
+      options?: { host?: string }
+    ) => Promise<void>;
   }
 
   export type Adapters = {
@@ -112,7 +129,6 @@ export namespace Wallet {
     plug: Adapter.Interface;
     bitfinity: Adapter.Interface;
   };
-
 }
 
 // ICRC related export interfaces
@@ -132,18 +148,33 @@ export namespace Adapter {
     constructor(url: string);
     url: string;
     wallets: Wallet.AdapterInfo[];
+    state: Wallet.WalletState;
     abstract isAvailable(): Promise<boolean>;
     abstract connect(config: Wallet.AdapterConfig): Promise<Wallet.Account>;
     abstract disconnect(): Promise<void>;
-    abstract createActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>>;
+    abstract createActor<T>(
+      canisterId: string,
+      idl: any
+    ): Promise<ActorSubclass<T>>;
     abstract getAccountId(): Promise<string | null>;
     abstract getPrincipal(): Promise<Principal | null>;
     abstract getBalance(): Promise<bigint>;
-    abstract icrc1BalanceOf(canisterId: Principal, account?: Wallet.Account): Promise<BigInt>;
-    abstract icrc1Transfer(canisterId, params: Wallet.TransferParams): Promise<void>;
+    abstract createAgent(options?: {
+      whitelist: string[];
+      host?: string;
+    }): Promise<HttpAgent>;
+    abstract icrc1BalanceOf(
+      canisterId: string,
+      account?: Wallet.Account
+    ): Promise<BigInt>;
+    abstract icrc1Transfer(
+      canisterId,
+      params: Wallet.TransferParams
+    ): Promise<void>;
+    abstract icrc1Metadata(canisterId: string): Promise<any>;
     abstract requestTransfer(params: Wallet.TransferParams): Promise<any>;
     abstract isConnected(): Promise<boolean | undefined>;
-    abstract whoAmI(): Promise<Principal|null>;
+    abstract whoAmI(): Promise<Principal | null>;
   }
 }
 

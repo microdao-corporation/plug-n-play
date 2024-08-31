@@ -4,8 +4,8 @@
     "module": "ESNext",
     "lib": ["ES2020", "DOM"],
     "declaration": true,
-    "declarationDir": "./dist/types",
-    "typeRoots": ["./node_modules/@types", "./types"],
+    "declarationDir": "./dist",
+    "typeRoots": ["./node_modules/@types", "src/types"],
     "outDir": "./dist",
     "strict": false,
     "esModuleInterop": true,
@@ -13,12 +13,13 @@
     "allowJs": true,
     "baseUrl": ".",
     "paths": {
-      "*": ["src/*", "types/*"]
+      "@windoge98/plug-n-play": ["src/*"],
+      "*": ["src/*"]
     },
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "types/**/*", "tests/**/*"],
+  "include": ["src/**/*", "src/types/**/*", "tests/**/*"],
   "exclude": ["node_modules", "dist"]
 }

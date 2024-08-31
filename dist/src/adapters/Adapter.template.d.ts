@@ -1,8 +1,13 @@
 import { Principal } from '@dfinity/principal';
-import { Wallet, Adapter } from '../../types/index';
+import { Wallet, Adapter } from '../types/index';
+import { HttpAgent } from '@dfinity/agent';
 export declare class TemplateAdapter extends Adapter.Interface {
-    icrc1Transfer(canisterId: any, params: Wallet.TransferParams): Promise<void>;
-    icrc1BalanceOf(canisterId: Principal, account?: Wallet.Account): Promise<BigInt>;
+    createAgent(options?: {
+        whitelist: string[];
+        host?: string;
+    }): Promise<HttpAgent>;
+    icrc1Transfer(canisterId: string, params: Wallet.TransferParams): Promise<void>;
+    icrc1BalanceOf(canisterId: string, account?: Wallet.Account): Promise<BigInt>;
     name: string;
     logo: string;
     readyState: string;

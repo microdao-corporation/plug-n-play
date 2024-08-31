@@ -1,12 +1,16 @@
 // src/adapters/Template.template.js
 import { Principal } from '@dfinity/principal';
-import { Wallet, Adapter } from '../../types/index';
+import { Wallet, Adapter } from '../types/index';
+import { HttpAgent } from '@dfinity/agent';
 
 export class TemplateAdapter extends Adapter.Interface {
-  icrc1Transfer(canisterId: any, params: Wallet.TransferParams): Promise<void> {
+  createAgent(options?: { whitelist: string[]; host?: string; }): Promise<HttpAgent> {
     throw new Error('Method not implemented.');
   }
-  icrc1BalanceOf(canisterId: Principal, account?: Wallet.Account): Promise<BigInt> {
+  icrc1Transfer(canisterId: string, params: Wallet.TransferParams): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+  icrc1BalanceOf(canisterId: string, account?: Wallet.Account): Promise<BigInt> {
     throw new Error('Method not implemented.');
   }
   name: string;

@@ -8,7 +8,7 @@ export default defineConfig({
     logLevel: 'debug',
     sourcemap: true,
     lib: {
-      entry: path.resolve(__dirname, './index.ts'),
+      entry: path.resolve(__dirname, 'src/index.ts'),
       name: 'PlugNPlay',
       formats: ['es', 'umd'],
       fileName: (format) => `plug-n-play.${format}.js`,
@@ -52,14 +52,17 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@types': path.resolve(__dirname, 'types'),
+      '@': path.resolve(__dirname, 'src'),
+      '@types': path.resolve(__dirname, 'src/types'),
       '@src': path.resolve(__dirname, 'src'),
     },
   },
   plugins: [
     dts({
       insertTypesEntry: true,
+      compilerOptions: {
+        declaration: true,
+      },
     }),
     viteStaticCopy({
       targets: [

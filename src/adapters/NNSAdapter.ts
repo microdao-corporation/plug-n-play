@@ -3,7 +3,7 @@
 import { Actor, HttpAgent, type ActorSubclass } from "@dfinity/agent";
 import { getAccountIdentifier } from "../utils/identifierUtils.js";
 import { AuthClient } from "@dfinity/auth-client";
-import { Wallet, Adapter } from "../../types/index";
+import { Wallet, Adapter } from "../types/index";
 import { Principal } from "@dfinity/principal";
 import { ICRC1_IDL } from "../did/icrc1.idl.js";
 import { hexStringToUint8Array, principalToSubAccount } from "@dfinity/utils";
@@ -89,7 +89,7 @@ export class NNSAdapter implements Adapter.Interface {
   }
 
   async icrc1BalanceOf(
-    canisterId: Principal,
+    canisterId: string,
     account: Wallet.Account
   ): Promise<BigInt> {
     if (!this.agent) {
@@ -130,12 +130,12 @@ export class NNSAdapter implements Adapter.Interface {
     return Actor.createActor(idl, { agent: this.agent, canisterId });
   }
 
-  async createAgent(host: string): Promise<HttpAgent> {
+  async createAgent(options?: { whitelist: string[], host?: string }): Promise<HttpAgent> {
     if (!this.authClient) {
       throw new Error("AuthClient is not initialized");
     }
     const identity = this.authClient.getIdentity();
-    const agent = HttpAgent.createSync({ identity, host });
+    const agent = HttpAgent.createSync({ identity, host: options.host });
     if (this.url.includes("localhost") || this.url.includes("127.0.0.1")) {
       await agent.fetchRootKey();
     }
