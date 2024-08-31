@@ -21,7 +21,7 @@ export declare class NNSAdapter implements Adapter.Interface {
     getAccountId(): Promise<string | null>;
     getPrincipal(): Promise<Principal | null>;
     getBalance(): Promise<bigint>;
-    icrc1_transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<void>;
+    icrc1Transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<void>;
     whoAmI(): Promise<Principal | null>;
     isConnected(): Promise<boolean>;
 }

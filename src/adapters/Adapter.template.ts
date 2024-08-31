@@ -3,7 +3,7 @@ import { Principal } from '@dfinity/principal';
 import { Wallet, Adapter } from '../../types/index';
 
 export class TemplateAdapter extends Adapter.Interface {
-  icrc1_transfer(canisterId: any, params: Wallet.TransferParams): Promise<void> {
+  icrc1Transfer(canisterId: any, params: Wallet.TransferParams): Promise<void> {
     throw new Error('Method not implemented.');
   }
   icrc1BalanceOf(canisterId: Principal, account?: Wallet.Account): Promise<BigInt> {

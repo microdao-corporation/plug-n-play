@@ -39,6 +39,6 @@ export declare class PlugAdapter implements Wallet.PlugInterface {
     getPrincipal(): Principal;
     connect(config: Wallet.AdapterConfig): Promise<Wallet.Account>;
     getBalance(): Promise<bigint>;
-    icrc1_transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<void>;
+    icrc1Transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<void>;
     whoAmI(): Promise<Principal>;
 }

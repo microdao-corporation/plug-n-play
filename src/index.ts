@@ -93,9 +93,9 @@ class PnP {
     return await this.state.provider.icrc1BalanceOf(canisterId, account);
   }
 
-  async icrc1_transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<any> {
+  async icrc1Transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<any> {
     if (!this.state.provider) throw new Error("Wallet not connected");
-    return await this.state.provider.icrc1_transfer(canisterId, params);
+    return await this.state.provider.icrc1Transfer(canisterId, params);
   }
 
   async getSignedActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>> {

@@ -140,7 +140,7 @@ export namespace Adapter {
     abstract getPrincipal(): Promise<Principal | null>;
     abstract getBalance(): Promise<bigint>;
     abstract icrc1BalanceOf(canisterId: Principal, account?: Wallet.Account): Promise<BigInt>;
-    abstract icrc1_transfer(canisterId, params: Wallet.TransferParams): Promise<void>;
+    abstract icrc1Transfer(canisterId, params: Wallet.TransferParams): Promise<void>;
     abstract requestTransfer(params: Wallet.TransferParams): Promise<any>;
     abstract isConnected(): Promise<boolean | undefined>;
     abstract whoAmI(): Promise<Principal|null>;

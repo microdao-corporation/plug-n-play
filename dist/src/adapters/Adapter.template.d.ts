@@ -1,7 +1,7 @@
 import { Principal } from '@dfinity/principal';
 import { Wallet, Adapter } from '../../types/index';
 export declare class TemplateAdapter extends Adapter.Interface {
-    icrc1_transfer(canisterId: any, params: Wallet.TransferParams): Promise<void>;
+    icrc1Transfer(canisterId: any, params: Wallet.TransferParams): Promise<void>;
     icrc1BalanceOf(canisterId: Principal, account?: Wallet.Account): Promise<BigInt>;
     name: string;
     logo: string;

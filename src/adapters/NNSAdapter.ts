@@ -164,7 +164,7 @@ export class NNSAdapter implements Adapter.Interface {
     throw new Error("Method not implemented.");
   }
 
-  async icrc1_transfer(
+  async icrc1Transfer(
     canisterId: Principal,
     params: Wallet.TransferParams
   ): Promise<void> {

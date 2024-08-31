@@ -105,7 +105,7 @@ export class PlugAdapter implements Wallet.PlugInterface {
     return BigInt(icpBalance ? icpBalance.amount : 0);
   }
 
-  async icrc1_transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<void> {
+  async icrc1Transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<void> {
     const icrcActor = this.createActor({
       canisterId: canisterId.toString(),
       interfaceFactory: ICRC1_IDL

@@ -9,7 +9,7 @@ declare class PnP {
     connect(walletId: string): Promise<Wallet.Account>;
     disconnect(): Promise<void>;
     icrc1BalanceOf(canisterId: Principal, account: Wallet.Account): Promise<BigInt>;
-    icrc1_transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<any>;
+    icrc1Transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<any>;
     getSignedActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>>;
     getCanisterActor<T>(canisterId: string, idl: any, isAnon?: boolean, isForced?: boolean, isSigned?: boolean): Promise<ActorSubclass<T>>;
     isWalletConnected(): boolean;

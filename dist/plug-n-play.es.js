@@ -6623,7 +6623,7 @@ class qe {
   async getBalance() {
     throw new Error("Method not implemented.");
   }
-  async icrc1_transfer(h, o) {
+  async icrc1Transfer(h, o) {
     await T0.createActor(Cr, {
       agent: this.agent,
       canisterId: h
@@ -6700,7 +6700,7 @@ class gt {
     const o = (await this.requestBalance()).find((x) => x.currency === "ICP");
     return BigInt(o ? o.amount : 0);
   }
-  async icrc1_transfer(h, o) {
+  async icrc1Transfer(h, o) {
     await this.createActor(
       {
         canisterId: h.toString(),
@@ -6785,9 +6785,9 @@ class Ve {
     if (!this.state.provider) throw new Error("Wallet not connected");
     return await this.state.provider.icrc1BalanceOf(h, o);
   }
-  async icrc1_transfer(h, o) {
+  async icrc1Transfer(h, o) {
     if (!this.state.provider) throw new Error("Wallet not connected");
-    return await this.state.provider.icrc1_transfer(h, o);
+    return await this.state.provider.icrc1Transfer(h, o);
   }
   async getSignedActor(h, o) {
     if (!this.state.provider) throw new Error("Wallet not connected");
