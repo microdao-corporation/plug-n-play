@@ -39,6 +39,7 @@ const pnp = createPnP({
   whitelist: ['ryjl3-tyaaa-aaaaa-aaaba-cai'], // ICP Ledger canister
   identityProvider: "https://identity.ic0.app",
 });
+const ledgerPrincipal = Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai');
 
 // Connect to a wallet
 async function connect(walletId: string) {
@@ -49,17 +50,18 @@ async function connect(walletId: string) {
 
 // Get balance
 async function getBalance(account: Account) {
-  const balance = await pnp.icrc1BalanceOf(Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'), account);
+  const balance = await pnp.icrc1BalanceOf(ledgerPrincipal, account);
   console.log("Balance:", balance.toString());
   return balance;
 }
 
 // Transfer tokens
 async function transfer(to: string, amount: bigint) {
-  const result = await pnp.icrc1_transfer(Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'), {
-    to: Principal.fromText(to),
-    amount: amount,
-  });
+  account = {
+    owner: Principal.fromText('principal-id'),
+    subaccount: []
+  }
+  const result = await pnp.icrc1_transfer(ledgerPrincipal, amount, account);
   console.log("Transfer result:", result);
   return result;
 }

@@ -8,7 +8,7 @@ export default defineConfig({
     logLevel: 'debug',
     sourcemap: true,
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: path.resolve(__dirname, './index.ts'),
       name: 'PlugNPlay',
       formats: ['es', 'umd'],
       fileName: (format) => `plug-n-play.${format}.js`,
