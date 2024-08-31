@@ -1,24 +1,40 @@
 import { AnonymousIdentity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
-import PnP from './src';
+import { createPnP, walletsList } from './src';
 import { BatchTransact } from "./src/utils/batchTransact";
 import { getAccountIdentifier } from './src/utils/identifierUtils.js';
 import { HOSTURL, NNS_CANISTER_ID } from './src/constants';
 import { Wallet } from './types';
 
 const principalIdFromHex = getAccountIdentifier;
-const PnPAdapter = new PnP({
-  whitelist: [NNS_CANISTER_ID],
-  host: HOSTURL,
-  identityProvider: "",
-});
+
+// Function to create a PnP instance
+function createPnPAdapter() {
+  return createPnP({
+    whitelist: [NNS_CANISTER_ID],
+    host: HOSTURL,
+    identityProvider: "",
+  });
+}
+
+// Create the PnP instance only when needed
+let PnPAdapter: ReturnType<typeof createPnP> | null = null;
+
+// Function to get or create the PnP instance
+function getPnPAdapter(): ReturnType<typeof createPnP> {
+  if (!PnPAdapter) {
+    PnPAdapter = createPnPAdapter();
+  }
+  return PnPAdapter;
+}
 
 if (typeof window !== 'undefined') {
   window.pnp = {
-    PnP,  // Assign the PnP class itself
+    PnP: { create: createPnP },  // Provide a 'create' method to instantiate PnP
     BatchTransact,
     nns: { AnonymousIdentity, Principal },
-  } as Wallet.PnPWindow;  // Type assertion to ensure it matches the Wallet.PnPWindow type
+    getPnPAdapter, // Add the function to get the PnP instance
+  } as Wallet.PnPWindow;
 }
 
-export { PnP, BatchTransact, principalIdFromHex, getAccountIdentifier, PnPAdapter };
+export { createPnP, walletsList, BatchTransact, principalIdFromHex, getAccountIdentifier, getPnPAdapter };

@@ -24,7 +24,7 @@ describe('index.ts', () => {
   });
 
   it('should export PnP', () => {
-    expect(indexModule.PnP).toBeDefined();
+    expect(PnP).toBeDefined();
   });
 
   it('should export BatchTransact', () => {

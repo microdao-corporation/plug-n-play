@@ -1,13 +1,18 @@
-import { Actor, HttpAgent, ActorSubclass } from "@dfinity/agent";
+// src/adapters/NNSAdapter.ts
+
+import { Actor, HttpAgent, type ActorSubclass } from "@dfinity/agent";
 import { getAccountIdentifier } from "../utils/identifierUtils.js";
 import { AuthClient } from "@dfinity/auth-client";
-import { Wallet } from '../../types';
-
-export class NNSAdapter implements Wallet.AdapterInterface {
+import { Wallet, Adapter } from "../../types/index";
+import { Principal } from "@dfinity/principal";
+import { ICRC1_IDL } from "../did/icrc1.idl.js";
+import { hexStringToUint8Array, principalToSubAccount } from "@dfinity/utils";
+export class NNSAdapter implements Adapter.Interface {
   name: string;
   logo: string;
   readyState: string;
   url: string;
+  wallets: Wallet.AdapterInfo[];
   private authClient: AuthClient | null;
   private agent: HttpAgent | null;
 
@@ -18,6 +23,10 @@ export class NNSAdapter implements Wallet.AdapterInterface {
     this.url = "http://localhost:4943"; // Use the correct host in production
     this.authClient = null;
     this.agent = null;
+  }
+  async requestTransfer(params: Wallet.TransferParams) {
+    // not possible with NNS
+    throw new Error("Method not implemented.");
   }
 
   async isAvailable(): Promise<boolean> {
@@ -33,7 +42,7 @@ export class NNSAdapter implements Wallet.AdapterInterface {
     }
 
     const isConnected = await this.authClient.isAuthenticated();
-    
+
     if (!isConnected) {
       return new Promise<Wallet.Account>((resolve, reject) => {
         this.authClient!.login({
@@ -60,7 +69,7 @@ export class NNSAdapter implements Wallet.AdapterInterface {
   private async _continueLogin(host: string): Promise<Wallet.Account> {
     try {
       const identity = this.authClient!.getIdentity();
-      const principal = identity.getPrincipal();  
+      const principal = identity.getPrincipal();
       this.agent = HttpAgent.createSync({
         identity,
         host,
@@ -69,10 +78,9 @@ export class NNSAdapter implements Wallet.AdapterInterface {
       if (this.url.includes("localhost") || this.url.includes("127.0.0.1")) {
         await this.agent.fetchRootKey();
       }
-      const sid = getAccountIdentifier(principal.toString());  
       return {
-        accountId: sid,
-        principalId: principal.toString(),
+        subaccount: principalToSubAccount(principal),
+        owner: principal || null,
       };
     } catch (error) {
       console.error("Error during _continueLogin:", error);
@@ -80,6 +88,21 @@ export class NNSAdapter implements Wallet.AdapterInterface {
     }
   }
 
+  async icrc1BalanceOf(
+    canisterId: Principal,
+    account: Wallet.Account
+  ): Promise<BigInt> {
+    if (!this.agent) {
+      throw new Error(
+        "Agent is not initialized. Ensure the wallet is connected."
+      );
+    }
+    const actor = Actor.createActor(ICRC1_IDL, {
+      agent: this.agent,
+      canisterId,
+    });
+    return (await actor.icrc1_balance_of(account)) as BigInt;
+  }
 
   async disconnect(): Promise<void> {
     if (this.authClient) {
@@ -90,13 +113,18 @@ export class NNSAdapter implements Wallet.AdapterInterface {
     }
   }
 
-  async createActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>> {
+  async createActor<T>(
+    canisterId: string,
+    idl: any
+  ): Promise<ActorSubclass<T>> {
     if (!canisterId || !idl) {
       throw new Error("Canister ID and Interface Factory are required");
     }
 
     if (!this.agent) {
-      throw new Error("Agent is not initialized. Ensure the wallet is connected.");
+      throw new Error(
+        "Agent is not initialized. Ensure the wallet is connected."
+      );
     }
 
     return Actor.createActor(idl, { agent: this.agent, canisterId });
@@ -114,40 +142,48 @@ export class NNSAdapter implements Wallet.AdapterInterface {
     return agent;
   }
 
-  async getAccountId(): Promise<string|boolean> {
+  async getAccountId(): Promise<string | null> {
     if (!this.authClient || !this.agent) {
       throw new Error("Wallet is not connected or initialized");
     }
     const identity = this.authClient.getIdentity();
     const principal = await identity.getPrincipal();
-    return getAccountIdentifier(principal.toString());
+    const accountId = getAccountIdentifier(principal.toString());
+    return accountId !== false ? accountId : null;
   }
 
-  async getPrincipal(): Promise<string> {
+  async getPrincipal(): Promise<Principal | null> {
     if (!this.authClient) {
       throw new Error("AuthClient is not initialized");
     }
     const identity = this.authClient.getIdentity();
-    return identity.getPrincipal().toString();
+    return identity.getPrincipal();
   }
 
   async getBalance(): Promise<bigint> {
     throw new Error("Method not implemented.");
   }
 
-  async transfer(params: Wallet.TransferParams): Promise<void> {
-    throw new Error("Method not implemented.");
+  async icrc1_transfer(
+    canisterId: Principal,
+    params: Wallet.TransferParams
+  ): Promise<void> {
+    const icrcActor = Actor.createActor(ICRC1_IDL, {
+      agent: this.agent,
+      canisterId: canisterId,
+    });
+    await icrcActor.icrc1_transfer(params);
   }
 
-  async whoAmI(): Promise<string> {
+  async whoAmI(): Promise<Principal | null> {
     if (!this.authClient || !this.agent) {
-      throw new Error("Wallet is not connected or initialized");
+      console.warn("NNS wallet is not connected or initialized");
     }
     const identity = this.authClient.getIdentity();
-    return identity.getPrincipal().toString();
+    return identity.getPrincipal();
   }
 
-  async isConnected(): Promise<boolean|undefined> {
-    return await this.authClient?.isAuthenticated();
+  async isConnected(): Promise<boolean> {
+    return (await this.authClient?.isAuthenticated()) ?? false;
   }
 }

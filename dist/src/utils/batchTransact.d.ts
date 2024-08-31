@@ -1,4 +1,4 @@
-import { Wallet } from '../../types';
+import { Wallet } from '../../types/index';
 export declare class BatchTransact {
     state: string;
     transactionLlist: Record<string, Wallet.Transaction.Item>;
@@ -10,6 +10,6 @@ export declare class BatchTransact {
     trxArray: Wallet.Transaction.Item[][];
     _info: any;
     _adapterObj: any;
-    constructor(transactionLlist: Record<string, Wallet.Transaction.Item> | undefined, _adapterObj: any);
+    constructor(transactionLlist: Record<string, Wallet.Transaction.Item>, _adapterObj: any);
     _prepareTrxArry(): Wallet.Transaction.Item[][];
 }

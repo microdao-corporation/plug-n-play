@@ -26,9 +26,15 @@ importers:
       '@dfinity/identity':
         specifier: ^2.0.0
         version: 2.0.0(@dfinity/agent@2.0.0(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0)(@peculiar/webcrypto@1.5.0)
+      '@dfinity/ledger-icrc':
+        specifier: ^2.4.0
+        version: 2.4.0(@dfinity/agent@2.0.0(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0))(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0)(@dfinity/utils@2.4.0(@dfinity/agent@2.0.0(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0))(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0))
       '@dfinity/principal':
         specifier: ^2.0.0
         version: 2.0.0
+      '@dfinity/utils':
+        specifier: ^2.4.0
+        version: 2.4.0(@dfinity/agent@2.0.0(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0))(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0)
       '@fort-major/msq-client':
         specifier: ^0.3.13
         version: 0.3.13(bufferutil@4.0.8)(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(bufferutil@4.0.8)(react@18.3.1))(react@18.3.1)(rollup@4.21.1)
@@ -888,11 +894,26 @@ packages:
       '@dfinity/principal': ^2.0.0
       '@peculiar/webcrypto': ^1.4.0
 
+  '@dfinity/ledger-icrc@2.4.0':
+    resolution: {integrity: sha512-7NMFU3uoQ0QOarIzGEjmXkVEJZYSp9L4dj5ZR+TM5S0Dvd1TMmMb8GOW8TCN9WGDQUfuhd2Pe3l6dRykRq23gQ==}
+    peerDependencies:
+      '@dfinity/agent': ^1.4.0
+      '@dfinity/candid': ^1.4.0
+      '@dfinity/principal': ^1.4.0
+      '@dfinity/utils': ^2.4.0
+
   '@dfinity/principal@0.19.3':
     resolution: {integrity: sha512-+nixVvdGt7ECxRvLXDXsvU9q9sSPssBtDQ4bXa149SK6gcYcmZ6lfWIi3DJNqj3tGROxILVBsguel9tECappsA==}
 
   '@dfinity/principal@2.0.0':
     resolution: {integrity: sha512-cqJ5kOrPpxco+wvJC4TFBhdr4lkw9mnwKGAYunesyqdzSYi8lnFB4dShNqlHFWdwoxNAw6OZkt/B+0nLa+7Yqw==}
+
+  '@dfinity/utils@2.4.0':
+    resolution: {integrity: sha512-1Bc+IcZTPXtPvDlDQElTjLRdHcpNOnu1vQyhQpFSXdwsnaXpdJzEhswq4GyzNjxRzaFnR0yrGCmbMjkb6UIe2A==}
+    peerDependencies:
+      '@dfinity/agent': ^1.4.0
+      '@dfinity/candid': ^1.4.0
+      '@dfinity/principal': ^1.4.0
 
   '@emotion/babel-plugin@11.12.0':
     resolution: {integrity: sha512-y2WQb+oP8Jqvvclh8Q55gLUyb7UFvgv7eJfsj7td5TToBrIUtPay2kMrZi4xjq9qw2vD0ZR5fSho0yqoFgX7Rw==}
@@ -5642,6 +5663,13 @@ snapshots:
       '@peculiar/webcrypto': 1.5.0
       borc: 2.1.2
 
+  '@dfinity/ledger-icrc@2.4.0(@dfinity/agent@2.0.0(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0))(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0)(@dfinity/utils@2.4.0(@dfinity/agent@2.0.0(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0))(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0))':
+    dependencies:
+      '@dfinity/agent': 2.0.0(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0)
+      '@dfinity/candid': 2.0.0(@dfinity/principal@2.0.0)
+      '@dfinity/principal': 2.0.0
+      '@dfinity/utils': 2.4.0(@dfinity/agent@2.0.0(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0))(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0)
+
   '@dfinity/principal@0.19.3':
     dependencies:
       '@noble/hashes': 1.4.0
@@ -5649,6 +5677,12 @@ snapshots:
   '@dfinity/principal@2.0.0':
     dependencies:
       '@noble/hashes': 1.4.0
+
+  '@dfinity/utils@2.4.0(@dfinity/agent@2.0.0(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0))(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0)':
+    dependencies:
+      '@dfinity/agent': 2.0.0(@dfinity/candid@2.0.0(@dfinity/principal@2.0.0))(@dfinity/principal@2.0.0)
+      '@dfinity/candid': 2.0.0(@dfinity/principal@2.0.0)
+      '@dfinity/principal': 2.0.0
 
   '@emotion/babel-plugin@11.12.0':
     dependencies:

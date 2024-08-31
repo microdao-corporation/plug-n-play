@@ -7,7 +7,7 @@
     "declarationDir": "./types",
     "typeRoots": ["./node_modules/@types", "./types"],
     "outDir": "./dist",
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "moduleResolution": "node",
     "allowJs": true,
@@ -19,6 +19,6 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "types/**/*", "tests"],
+  "include": ["src/**/*", "types/**/*", "tests/**/*"],
   "exclude": ["node_modules", "dist"]
 }

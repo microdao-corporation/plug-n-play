@@ -52,7 +52,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'node:buffer': 'buffer',
+      '@': path.resolve(__dirname, './src'),
+      '@types': path.resolve(__dirname, 'types'),
+      '@src': path.resolve(__dirname, 'src'),
     },
   },
   plugins: [

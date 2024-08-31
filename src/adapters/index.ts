@@ -2,9 +2,10 @@
 // Import adapters
 import { NNSAdapter } from "./NNSAdapter";
 import { PlugAdapter } from "./PlugAdapter";
-import { Wallet } from '../../types';
+import { Wallet } from '../../types/index';
 import dfinityLogo from "../../assets/dfinity.svg";
 import plugLogo from "../../assets/plug.jpg"; 
+import bitfinityLogo from "../../assets/bitfinity.svg";
 
 export const walletList: Wallet.AdapterInfo[] = [
   {
@@ -19,9 +20,10 @@ export const walletList: Wallet.AdapterInfo[] = [
     icon: plugLogo,
     adapter: PlugAdapter,
   },
+
 ];
 
 export {
   NNSAdapter,
-  PlugAdapter
+  PlugAdapter,
 };

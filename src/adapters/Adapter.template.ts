@@ -1,11 +1,16 @@
 // src/adapters/Template.template.js
-import { Wallet, ICRC } from '../../types';
+import { Principal } from '@dfinity/principal';
+import { Wallet, Adapter } from '../../types/index';
 
-export class TemplateAdapter extends Wallet.AdapterInterface {
+export class TemplateAdapter extends Adapter.Interface {
+  icrc1BalanceOf(canisterId: Principal, account?: Wallet.Account): Promise<BigInt> {
+    throw new Error('Method not implemented.');
+  }
   name: string;
   logo: string;
   readyState: string;
-  url: string;
+  url: string = '';
+
   constructor() {
       const url = ''; // Add a default value for the 'url' property
       super(url);
@@ -21,22 +26,26 @@ export class TemplateAdapter extends Wallet.AdapterInterface {
   getBalance(): Promise<bigint> {
     throw new Error("Method not implemented.");
   }
+  requestTransfer: (params: Wallet.TransferParams) => Promise<void> = async (params) => {
+    throw new Error("Method not implemented.");
+  }
+
   transfer(params: Wallet.TransferParams): Promise<void> {
     throw new Error("Method not implemented.");
   }
   createActor<T>(canisterId: string, idl: any): Promise<T> {
     throw new Error("Method not implemented.");
   }
-  getAccountId(): Promise<string | boolean> {
+  getAccountId(): Promise<string | null> {
     throw new Error("Method not implemented.");
   }
-  getPrincipal(): Promise<string | boolean> {
+  getPrincipal(): Promise<Principal | null> {
     throw new Error("Method not implemented.");
   }
   isConnected(): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
-  whoAmI(): Promise<string> {
+  whoAmI(): Promise<Principal | null> {
     throw new Error("Method not implemented.");
   }
   async isAvailable(): Promise<boolean> {
@@ -45,8 +54,8 @@ export class TemplateAdapter extends Wallet.AdapterInterface {
 
   async connect(_config: Wallet.AdapterConfig): Promise<Wallet.Account> {
     return {
-      accountId: "",
-      principalId: ""
+      subaccount: null,
+      owner: null
     }
   }
 }
