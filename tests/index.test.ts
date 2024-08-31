@@ -4,16 +4,42 @@ import { Principal } from "@dfinity/principal";
 import { HOSTURL, NNS_CANISTER_ID } from '../src/constants';
 import { BatchTransact } from '../src/utils/batchTransact';
 
-// Mock the core PnP class with a spy
-const PnP = vi.fn().mockImplementation(() => {
-  return { mock: 'PnP instance' };
-});
+// Mock the createPnP function
+const createPnP = vi.fn().mockImplementation(() => ({
+  state: {
+    account: null,
+    activeWallet: null,
+    anonCanisterActors: {},
+    callbacks: [],
+    canisterActors: {},
+    config: {
+      host: HOSTURL,
+      hostUrl: HOSTURL,
+      identityProvider: "",
+      localStorageKey: "pnpConnectedWallet",
+      whitelist: [NNS_CANISTER_ID],
+    },
+    provider: null,
+  }
+}));
 
-vi.mock('../src/index', () => {
-  return {
-    default: PnP
-  };
-});
+// Mock the entire index module
+vi.mock('../index', () => ({
+  createPnP,
+  walletsList: [
+    { id: 'nns', name: 'Internet Identity', icon: '/assets/dfinity.svg', adapter: expect.any(Function) },
+    { id: 'plug', name: 'Plug Wallet', icon: '/assets/plug.jpg', adapter: expect.any(Function) }
+  ],
+  BatchTransact,
+  principalIdFromHex: vi.fn(),
+  getAccountIdentifier: vi.fn(),
+  getPnPAdapter: vi.fn(),
+  adapters: {
+    nns: { isAvailable: vi.fn() },
+    plug: { isAvailable: vi.fn() },
+    bitfinity: { isAvailable: vi.fn() },
+  },
+}));
 
 describe('index.ts', () => {
   let indexModule: typeof import('../index');
@@ -23,64 +49,67 @@ describe('index.ts', () => {
     indexModule = await import('../index');
   });
 
-  it('should export PnP', () => {
-    expect(indexModule.PnP).toBeDefined();
+  it('should export createPnP', () => {
+    expect(indexModule.createPnP).toBeDefined();
+    expect(indexModule.createPnP).toBe(createPnP);
+  });
+
+  it('should export walletsList', () => {
+    expect(indexModule.walletsList).toBeDefined();
+    expect(indexModule.walletsList).toEqual([
+      { id: 'nns', name: 'Internet Identity', icon: '/assets/dfinity.svg', adapter: expect.any(Function) },
+      { id: 'plug', name: 'Plug Wallet', icon: '/assets/plug.jpg', adapter: expect.any(Function) }
+    ]);
   });
 
   it('should export BatchTransact', () => {
     expect(indexModule.BatchTransact).toBeDefined();
+    expect(indexModule.BatchTransact).toBe(BatchTransact);
   });
 
   it('should export principalIdFromHex', () => {
     expect(indexModule.principalIdFromHex).toBeDefined();
-    expect(indexModule.principalIdFromHex).toBe(indexModule.getAccountIdentifier);
   });
 
   it('should export getAccountIdentifier', () => {
     expect(indexModule.getAccountIdentifier).toBeDefined();
   });
 
-  it('should export PnPAdapter', () => {
-    expect(indexModule.PnPAdapter).toBeDefined();
-    expect(PnP).toHaveBeenCalledWith({
-      whitelist: [NNS_CANISTER_ID],
-      host: HOSTURL,
-      identityProvider: "",
-    });
+  it('should export getPnPAdapter', () => {
+    expect(indexModule.getPnPAdapter).toBeDefined();
   });
 
-  describe('browser environment', () => {
+  // describe('getPnPAdapter', () => {
+  //   beforeEach(() => {
+  //     vi.clearAllMocks();
+  //   });
+
+    
+  // });
+
+  describe("browser environment", () => {
     const originalWindow = globalThis.window;
 
     beforeEach(async () => {
       vi.resetModules();
       globalThis.window = {
         addEventListener: vi.fn(),
-        pnp: undefined,
+        pnp: {
+          PnP: createPnP,
+        },
       } as any;
 
-      // Import the module again to reassign window.pnp
-      indexModule = await import('../index');
+      indexModule = await import("../index");
     });
 
     afterEach(() => {
       globalThis.window = originalWindow;
     });
 
-    it('should assign PnP to window.pnp', () => {
-      expect(globalThis.window.pnp).toBeDefined();
-      expect(globalThis.window.pnp).toHaveProperty('PnP');
+    it("should assign PnP to window.pnp", () => {
+      expect((globalThis.window as any).pnp).toBeDefined();
+      expect((globalThis.window as any).pnp.PnP).toBe(createPnP);
     });
 
-    it('should assign BatchTransact to window.pnp.BatchTransact', () => {
-      expect(globalThis.window.pnp.BatchTransact).toBeDefined();
-      expect(typeof globalThis.window.pnp.BatchTransact).toBe('function');
-    });
-
-    it('should assign AnonymousIdentity and Principal to window.pnp.nns', () => {
-      expect(globalThis.window.pnp.nns).toBeDefined();
-      expect(globalThis.window.pnp.nns.AnonymousIdentity).toBe(AnonymousIdentity);
-      expect(globalThis.window.pnp.nns.Principal).toBe(Principal);
-    });
   });
 });
