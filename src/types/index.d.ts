@@ -111,8 +111,8 @@ export namespace Wallet {
       host?: string;
     }) => Promise<void>;
     disconnect: () => Promise<void>;
-    getAccountId: () => string;
-    getPrincipal: () => Principal;
+    accountId: string;
+    principalId: string;
   }
 
   // Bitfinity-specific methods
@@ -162,7 +162,7 @@ export namespace Adapter {
     abstract createAgent(options?: {
       whitelist: string[];
       host?: string;
-    }): Promise<HttpAgent>;
+    }): Promise<void>;
     abstract icrc1BalanceOf(
       canisterId: string,
       account?: Wallet.Account

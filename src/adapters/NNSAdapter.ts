@@ -7,6 +7,7 @@ import { Wallet, Adapter } from "../types/index";
 import { Principal } from "@dfinity/principal";
 import { ICRC1_IDL } from "../did/icrc1.idl.js";
 import { hexStringToUint8Array, principalToSubAccount } from "@dfinity/utils";
+
 export class NNSAdapter implements Adapter.Interface {
   name: string;
   logo: string;
@@ -23,6 +24,14 @@ export class NNSAdapter implements Adapter.Interface {
     this.url = "http://localhost:4943"; // Use the correct host in production
     this.authClient = null;
     this.agent = null;
+  }
+  state: Wallet.WalletState;
+  icrc1Metadata(canisterId: string): Promise<any> {
+    const actor = Actor.createActor(ICRC1_IDL, {
+      agent: this.agent,
+      canisterId,
+    });
+    return actor.icrc1_metadata();
   }
   async requestTransfer(params: Wallet.TransferParams) {
     // not possible with NNS
@@ -130,7 +139,10 @@ export class NNSAdapter implements Adapter.Interface {
     return Actor.createActor(idl, { agent: this.agent, canisterId });
   }
 
-  async createAgent(options?: { whitelist: string[], host?: string }): Promise<HttpAgent> {
+  async createAgent(options?: {
+    whitelist: string[];
+    host?: string;
+  }): Promise<void> {
     if (!this.authClient) {
       throw new Error("AuthClient is not initialized");
     }
@@ -139,7 +151,6 @@ export class NNSAdapter implements Adapter.Interface {
     if (this.url.includes("localhost") || this.url.includes("127.0.0.1")) {
       await agent.fetchRootKey();
     }
-    return agent;
   }
 
   async getAccountId(): Promise<string | null> {

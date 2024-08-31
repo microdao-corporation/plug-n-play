@@ -1,19 +1,19 @@
 import { ActorSubclass } from '@dfinity/agent';
-import { Wallet } from '../../types/index';
+import { Adapter, Wallet } from '../types';
 import { Principal } from '@dfinity/principal';
-export declare class PlugAdapter implements Wallet.PlugInterface {
+export declare class PlugAdapter implements Adapter.Interface {
     name: string;
     logo: string;
     readyState: string;
     url: string;
     constructor();
+    wallets: Wallet.AdapterInfo[];
+    state: Wallet.WalletState;
+    icrc1Metadata(canisterId: string): Promise<any>;
     isAvailable(): Promise<boolean>;
     requestConnect(params: any): Promise<any>;
     isConnected(): Promise<boolean>;
-    createActor<T>(options: {
-        canisterId: string;
-        interfaceFactory: any;
-    }): Promise<ActorSubclass<T>>;
+    createActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>>;
     requestBalance(): Promise<Array<{
         amount: number;
         currency: string;
@@ -35,8 +35,9 @@ export declare class PlugAdapter implements Wallet.PlugInterface {
         host?: string;
     }): Promise<void>;
     disconnect(): Promise<void>;
-    getAccountId(): string;
-    getPrincipal(): Principal;
+    getAccountId(): Promise<string>;
+    getPrincipal(): Promise<Principal>;
+    icrc1BalanceOf(canisterId: string, account: Wallet.Account): Promise<BigInt>;
     connect(config: Wallet.AdapterConfig): Promise<Wallet.Account>;
     getBalance(): Promise<bigint>;
     icrc1Transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<void>;

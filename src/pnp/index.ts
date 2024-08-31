@@ -127,16 +127,16 @@ class PnP {
 
     if (isAnon) {
       if (isForced || !this.state.anonCanisterActors[canisterId]) {
-        const pubAgent = new HttpAgent({
+        const pubAgent = HttpAgent.createSync({
           identity: new AnonymousIdentity(),
           host: this.state.config.hostUrl,
         });
         if (this.state.config.hostUrl?.includes("localhost")) {
           await pubAgent.fetchRootKey();
         }
-        const actor = Actor.createActor<T>(idl, {
-          agent: pubAgent,
-          canisterId: canisterId,
+        const actor = this.state.provider.createActor<T>(idl, {
+          canisterId,
+          idl
         });
         this.state.anonCanisterActors[canisterId] = actor;
         return actor;
@@ -155,7 +155,7 @@ class PnP {
     }
   }
 
-  createAgent(options?: { whitelist: string[]; host?: string }): Promise<HttpAgent> {
+  createAgent(options?: { whitelist: string[]; host?: string }): Promise<void> {
     if (options?.host){
       this.state.config.hostUrl = options.host;
     } else {

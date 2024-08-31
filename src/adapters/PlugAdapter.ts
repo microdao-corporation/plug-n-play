@@ -1,13 +1,13 @@
 // src/adapters/PlugAdapter.ts
 
-import { Actor, type ActorSubclass } from '@dfinity/agent';
-import { Wallet } from '../../types/index';
+import { Actor, HttpAgent, type ActorSubclass } from '@dfinity/agent';
+import { Adapter, Wallet } from '../types';
 import { Principal } from '@dfinity/principal';
 import { getAccountIdentifier } from '../utils/identifierUtils';
 import { hexStringToUint8Array } from '@dfinity/utils';
 import { ICRC1_IDL } from '../did/icrc1.idl.js';
 
-export class PlugAdapter implements Wallet.PlugInterface {
+export class PlugAdapter implements Adapter.Interface {
   name: string;
   logo: string;
   readyState: string;
@@ -18,6 +18,13 @@ export class PlugAdapter implements Wallet.PlugInterface {
     this.logo = 'path_to_plug_logo.svg';
     this.readyState = "NotDetected";
     this.url = "https://plugwallet.ooo/";
+  }
+  wallets: Wallet.AdapterInfo[];
+  state: Wallet.WalletState;
+  icrc1Metadata(canisterId: string): Promise<any> {
+    const actor = window.ic.plug.createActor({canisterId, interfaceFactory: ICRC1_IDL});
+    // @ts-ignore
+    return actor.icrc1_metadata();
   }
 
   async isAvailable(): Promise<boolean> {
@@ -45,7 +52,8 @@ export class PlugAdapter implements Wallet.PlugInterface {
     return await window.ic!.plug!.isConnected();
   }
 
-  async createActor<T>(options: { canisterId: string; interfaceFactory: any; }): Promise<ActorSubclass<T>> {
+  async createActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>> {
+    const options = { canisterId, interfaceFactory: idl };
     return window.ic!.plug!.createActor(options);
   }
 
@@ -70,7 +78,8 @@ export class PlugAdapter implements Wallet.PlugInterface {
   }
 
   async createAgent(options?: { whitelist: string[], host?: string }): Promise<void> {
-    return window.ic!.plug!.createAgent(options);
+    const agent = await window.ic!.plug!.createAgent(options);
+    return agent;
   }
 
   async disconnect(): Promise<void> {
@@ -78,21 +87,29 @@ export class PlugAdapter implements Wallet.PlugInterface {
     this.readyState = "Disconnected";
   }
 
-  getAccountId(): string {
-    return getAccountIdentifier(this.getPrincipal().toString()) as string;
+  getAccountId(): Promise<string> {
+    return Promise.resolve(window.ic.plug.accountId);
   }
 
-  getPrincipal(): Principal {
-    return window.ic!.plug!.getPrincipal();
+  getPrincipal(): Promise<Principal> {
+    return Promise.resolve(Principal.fromText(window.ic!.plug!.principalId));
   }
 
+  async icrc1BalanceOf(canisterId: string, account: Wallet.Account): Promise<BigInt> {
+    const actor = await window.ic!.plug!.createActor({
+      canisterId,
+      interfaceFactory: ICRC1_IDL
+    });
+    // @ts-ignore
+    return actor.icrc1_balance_of(account);
+  }
 
   // Additional methods to satisfy Adapter.Interface
   async connect(config: Wallet.AdapterConfig): Promise<Wallet.Account> {
     const publicKey = await this.requestConnect(config);
-    const principal = this.getPrincipal();
-    const accountId = this.getAccountId();
-
+    const principal = await this.getPrincipal(); // Await the getPrincipal() function call
+    const accountId = await this.getAccountId(); // Await the getAccountId() function call
+  
     return {
       subaccount: hexStringToUint8Array(accountId),
       owner: principal,
@@ -106,7 +123,7 @@ export class PlugAdapter implements Wallet.PlugInterface {
   }
 
   async icrc1Transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<void> {
-    const icrcActor = this.createActor({
+    const icrcActor = window.ic.plug.createActor({
       canisterId: canisterId.toString(),
       interfaceFactory: ICRC1_IDL
     }

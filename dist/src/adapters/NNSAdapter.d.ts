@@ -1,4 +1,4 @@
-import { HttpAgent, ActorSubclass } from '@dfinity/agent';
+import { ActorSubclass } from '@dfinity/agent';
 import { Wallet, Adapter } from '../types/index';
 import { Principal } from '@dfinity/principal';
 export declare class NNSAdapter implements Adapter.Interface {
@@ -10,6 +10,8 @@ export declare class NNSAdapter implements Adapter.Interface {
     private authClient;
     private agent;
     constructor();
+    state: Wallet.WalletState;
+    icrc1Metadata(canisterId: string): Promise<any>;
     requestTransfer(params: Wallet.TransferParams): Promise<void>;
     isAvailable(): Promise<boolean>;
     connect(config: Wallet.AdapterConfig): Promise<Wallet.Account>;
@@ -20,7 +22,7 @@ export declare class NNSAdapter implements Adapter.Interface {
     createAgent(options?: {
         whitelist: string[];
         host?: string;
-    }): Promise<HttpAgent>;
+    }): Promise<void>;
     getAccountId(): Promise<string | null>;
     getPrincipal(): Promise<Principal | null>;
     getBalance(): Promise<bigint>;

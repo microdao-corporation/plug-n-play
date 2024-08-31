@@ -1,5 +1,5 @@
 import { Adapter, Wallet } from '../types/index';
-import { HttpAgent, ActorSubclass } from '@dfinity/agent';
+import { ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 declare class PnP {
     state: {
@@ -24,7 +24,7 @@ declare class PnP {
     createAgent(options?: {
         whitelist: string[];
         host?: string;
-    }): Promise<HttpAgent>;
+    }): Promise<void>;
     isWalletConnected(): boolean;
     activeWallet(): string | null;
     registerCallback(callback: Wallet.WalletEventCallback): void;
