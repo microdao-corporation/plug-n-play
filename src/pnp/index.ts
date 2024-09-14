@@ -10,18 +10,18 @@ import { Principal } from "@dfinity/principal";
 import { getAccountIdentifier } from "../utils/identifierUtils";
 import { ICRC1_IDL } from "../did/icrc1.idl.js";
 
-class PnP {
+class PNP {
   state: {
     account: Wallet.Account | null;
     activeWallet: string | null;
     provider: Adapter.Interface | null;
     canisterActors: Record<string, ActorSubclass<any>>;
     anonCanisterActors: Record<string, ActorSubclass<any>>;
-    config: Wallet.PnPConfig;
+    config: Wallet.PNPConfig;
     callbacks: Wallet.WalletEventCallback[];
   };
 
-  constructor(config: Wallet.PnPConfig = {}) {
+  constructor(config: Wallet.PNPConfig = {}) {
     this.state = {
       account: null,
       activeWallet: null,
@@ -72,7 +72,7 @@ class PnP {
     };
 
     localStorage.setItem(this.state.config.localStorageKey, walletId);
-    
+
     return connectionResult;
   }
 
@@ -106,7 +106,37 @@ class PnP {
     return await actor.icrc1_metadata();
   }
 
-  async getSignedActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>> {
+  async getActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>> {
+    try {
+      if (!this.state?.provider) {
+        if (!(canisterId in this.state.anonCanisterActors)) {
+          const pubAgent = HttpAgent.createSync({
+            identity: new AnonymousIdentity(),
+            host: this.state.config.hostUrl,
+          });
+          if (this.state.config.hostUrl?.includes("localhost")) {
+            await pubAgent.fetchRootKey();
+          }
+          const actor = await Actor.createActor(idl, {
+            canisterId,
+            agent: pubAgent,
+          });
+          this.state.anonCanisterActors[canisterId] = actor;
+        }
+        return this.state.anonCanisterActors[canisterId] as ActorSubclass<T>;
+      } else {
+        return await this.getSignedActor<T>(canisterId, idl);
+      }
+    } catch (error) {
+      console.error("Error creating actor:", error);
+      throw error;
+    }
+  }
+
+  async getSignedActor<T>(
+    canisterId: string,
+    idl: any
+  ): Promise<ActorSubclass<T>> {
     if (!this.state.provider) throw new Error("Wallet not connected");
     try {
       return await this.state.provider.createActor<T>(canisterId, idl);
@@ -156,10 +186,13 @@ class PnP {
   }
 
   createAgent(options?: { whitelist: string[]; host?: string }): Promise<void> {
-    if (options?.host){
+    if (options?.host) {
       this.state.config.hostUrl = options.host;
     } else {
-      options = { whitelist: this.state.config.whitelist, host: this.state.config.hostUrl };
+      options = {
+        whitelist: this.state.config.whitelist,
+        host: this.state.config.hostUrl,
+      };
     }
     if (!this.state.provider) throw new Error("Wallet not connected");
     return this.state.provider.createAgent(options);
@@ -179,4 +212,4 @@ class PnP {
 }
 
 export const walletsList = walletList;
-export const createPnP = (config: Wallet.PnPConfig = {}) => new PnP(config);
+export const createPNP = (config: Wallet.PNPConfig = {}) => new PNP(config);

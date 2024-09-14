@@ -30,11 +30,11 @@ npm install @windoge98/plug-n-play
 Here's how to initialize and use Plug N Play in your application:
 
 ```typescript
-import { createPnP, getPnPAdapter } from "@windoge98/plug-n-play";
+import { createPNP, getPNPAdapter } from "@windoge98/plug-n-play";
 import { Principal } from "@dfinity/principal";
 
-// Initialize PnP
-const pnp = createPnP({
+// Initialize PNP
+const pnp = createPNP({
   hostUrl: "https://ic0.app",
   whitelist: ['ryjl3-tyaaa-aaaaa-aaaba-cai'], // ICP Ledger canister
   identityProvider: "https://identity.ic0.app",
@@ -84,8 +84,8 @@ async function interactWithCanister(canisterId: string) {
 
 ## Best Practices
 
-1. Always initialize PnP before attempting to connect to a wallet.
-2. Use try-catch blocks when calling PnP methods to handle potential errors.
+1. Always initialize PNP before attempting to connect to a wallet.
+2. Use try-catch blocks when calling PNP methods to handle potential errors.
 3. Keep your canister whitelist up-to-date to ensure smooth interactions.
 4. Regularly check for updates to the Plug N Play library to benefit from new features and improvements.
 5. For local development, make sure to use the correct `hostUrl` and `identityProvider`.

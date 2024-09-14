@@ -1,6 +1,6 @@
-import { ActorSubclass } from '@dfinity/agent';
-import { Adapter, Wallet } from '../types';
-import { Principal } from '@dfinity/principal';
+import { ActorSubclass } from '../@dfinity/agent';
+import { Adapter, Wallet } from '../../types';
+import { Principal } from '../@dfinity/principal';
 export declare class PlugAdapter implements Adapter.Interface {
     name: string;
     logo: string;

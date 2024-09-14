@@ -1,4 +1,4 @@
-import { SignIdentity } from '@dfinity/agent';
+import { SignIdentity } from '../@dfinity/agent';
 export class StoicIdentity extends SignIdentity {
     static disconnect(): void;
     static connect(host: any): Promise<any>;

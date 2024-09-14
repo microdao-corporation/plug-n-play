@@ -4,8 +4,8 @@ import { Principal } from "@dfinity/principal";
 import { HOSTURL, NNS_CANISTER_ID } from '../src/constants';
 import { BatchTransact } from '../src/utils/batchTransact';
 
-// Mock the createPnP function
-const createPnP = vi.fn().mockImplementation(() => ({
+// Mock the createPNP function
+const createPNP = vi.fn().mockImplementation(() => ({
   state: {
     account: null,
     activeWallet: null,
@@ -25,7 +25,7 @@ const createPnP = vi.fn().mockImplementation(() => ({
 
 // Mock the entire index module
 vi.mock('../index', () => ({
-  createPnP,
+  createPNP,
   walletsList: [
     { id: 'nns', name: 'Internet Identity', icon: '/assets/dfinity.svg', adapter: expect.any(Function) },
     { id: 'plug', name: 'Plug Wallet', icon: '/assets/plug.jpg', adapter: expect.any(Function) }
@@ -33,7 +33,7 @@ vi.mock('../index', () => ({
   BatchTransact,
   principalIdFromHex: vi.fn(),
   getAccountIdentifier: vi.fn(),
-  getPnPAdapter: vi.fn(),
+  getPNPAdapter: vi.fn(),
   adapters: {
     nns: { isAvailable: vi.fn() },
     plug: { isAvailable: vi.fn() },
@@ -49,9 +49,9 @@ describe('index.ts', () => {
     indexModule = await import('../index');
   });
 
-  it('should export createPnP', () => {
-    expect(indexModule.createPnP).toBeDefined();
-    expect(indexModule.createPnP).toBe(createPnP);
+  it('should export createPNP', () => {
+    expect(indexModule.createPNP).toBeDefined();
+    expect(indexModule.createPNP).toBe(createPNP);
   });
 
   it('should export walletsList', () => {
@@ -75,11 +75,11 @@ describe('index.ts', () => {
     expect(indexModule.getAccountIdentifier).toBeDefined();
   });
 
-  it('should export getPnPAdapter', () => {
-    expect(indexModule.getPnPAdapter).toBeDefined();
+  it('should export getPNPAdapter', () => {
+    expect(indexModule.getPNPAdapter).toBeDefined();
   });
 
-  // describe('getPnPAdapter', () => {
+  // describe('getPNPAdapter', () => {
   //   beforeEach(() => {
   //     vi.clearAllMocks();
   //   });
@@ -95,7 +95,7 @@ describe('index.ts', () => {
       globalThis.window = {
         addEventListener: vi.fn(),
         pnp: {
-          PnP: createPnP,
+          PNP: createPNP,
         },
       } as any;
 
@@ -106,9 +106,9 @@ describe('index.ts', () => {
       globalThis.window = originalWindow;
     });
 
-    it("should assign PnP to window.pnp", () => {
+    it("should assign PNP to window.pnp", () => {
       expect((globalThis.window as any).pnp).toBeDefined();
-      expect((globalThis.window as any).pnp.PnP).toBe(createPnP);
+      expect((globalThis.window as any).pnp.PNP).toBe(createPNP);
     });
 
   });

@@ -1,4 +1,4 @@
-import { Wallet } from '../../types/index';
+import { Wallet } from '../types/index';
 
 export class BatchTransact {
     state: string = 'idle';

@@ -1,6 +1,6 @@
-import { Principal } from '@dfinity/principal';
-import { Wallet, Adapter } from '../types/index';
-import { HttpAgent } from '@dfinity/agent';
+import { Principal } from '../@dfinity/principal';
+import { Wallet, Adapter } from '../../types/index';
+import { HttpAgent } from '../@dfinity/agent';
 export declare class TemplateAdapter extends Adapter.Interface {
     createAgent(options?: {
         whitelist: string[];

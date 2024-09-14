@@ -53,8 +53,7 @@ export class PlugAdapter implements Adapter.Interface {
   }
 
   async createActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>> {
-    const options = { canisterId, interfaceFactory: idl };
-    return window.ic!.plug!.createActor(options);
+    return window.ic!.plug!.createActor({ canisterId, interfaceFactory: idl });
   }
 
   async requestBalance(): Promise<Array<{ amount: number, currency: string, image: string, name: string, value: number }>> {

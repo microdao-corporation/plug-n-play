@@ -13,7 +13,7 @@ declare module "*.jpeg";
 declare module "*.svg";
 
 export namespace Wallet {
-  export interface PnPConfig {
+  export interface PNPConfig {
     hostUrl?: string;
     localStorageKey?: string;
     defaultCanisterId?: string;
@@ -21,7 +21,7 @@ export namespace Wallet {
     [key: string]: any;
   }
 
-  export interface PnPWindow {
+  export interface PNPWindow {
     BatchTransact: typeof BatchTransact;
     nns: {
       AnonymousIdentity: typeof AnonymousIdentity;
@@ -184,6 +184,6 @@ declare global {
       plug?: Wallet.PlugInterface;
       infinityWallet?: Wallet.BitfinityInterface;
     };
-    pnp: Wallet.PnPWindow;
+    pnp: Wallet.PNPWindow;
   }
 }

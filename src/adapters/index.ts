@@ -2,7 +2,7 @@
 // Import adapters
 import { NNSAdapter } from "./NNSAdapter";
 import { PlugAdapter } from "./PlugAdapter";
-import { Wallet } from '../../types/index';
+import { Wallet } from '../types/index';
 import dfinityLogo from "../../assets/dfinity.svg";
 import plugLogo from "../../assets/plug.jpg"; 
 import bitfinityLogo from "../../assets/bitfinity.svg";
