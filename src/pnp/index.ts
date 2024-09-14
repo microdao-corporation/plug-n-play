@@ -121,7 +121,8 @@ class PNP {
             canisterId,
             agent: pubAgent,
           });
-          this.state.anonCanisterActors[canisterId] = actor;
+          this.state.anonCanisterActors[canisterId] = actor as ActorSubclass<T>;
+          return actor as ActorSubclass<T>;
         }
         return this.state.anonCanisterActors[canisterId] as ActorSubclass<T>;
       } else {
@@ -168,7 +169,7 @@ class PNP {
           canisterId,
           idl
         });
-        this.state.anonCanisterActors[canisterId] = actor;
+        this.state.anonCanisterActors[canisterId] = await actor as ActorSubclass<T>;
         return actor;
       } else {
         return this.state.anonCanisterActors[canisterId] as ActorSubclass<T>;

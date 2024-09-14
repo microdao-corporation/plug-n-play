@@ -6648,7 +6648,10 @@ class bt {
     this.name = "Plug", this.logo = "path_to_plug_logo.svg", this.readyState = "NotDetected", this.url = "https://plugwallet.ooo/";
   }
   icrc1Metadata(u) {
-    return window.ic.plug.createActor({ canisterId: u, interfaceFactory: _0 }).icrc1_metadata();
+    return window.ic.plug.createActor({
+      canisterId: u,
+      interfaceFactory: _0
+    }).icrc1_metadata();
   }
   async isAvailable() {
     return !!(window.ic && window.ic.plug);
@@ -6656,11 +6659,18 @@ class bt {
   async requestConnect(u) {
     if (!await this.isAvailable())
       throw this.readyState = "NotDetected", window.open(this.url, "_blank"), new Error("Plug wallet is not available");
+    const a = () => {
+      console.log(window.ic.plug.sessionManager.sessionData);
+    };
     try {
-      const a = await window.ic.plug.requestConnect(u);
-      return this.readyState = "Connected", a;
-    } catch (a) {
-      throw console.error("Error connecting to Plug wallet:", a), a;
+      const x = await window.ic.plug.requestConnect({
+        ...u,
+        onConnectionUpdate: a,
+        timeout: 5e4
+      });
+      console.log("The connected user's public key is:", x);
+    } catch (x) {
+      console.log(x);
     }
   }
   async isConnected() {
@@ -6716,12 +6726,10 @@ class bt {
     return BigInt(a ? a.amount : 0);
   }
   async icrc1Transfer(u, a) {
-    await window.ic.plug.createActor(
-      {
-        canisterId: u.toString(),
-        interfaceFactory: _0
-      }
-    ).icrc1_transfer(u, a);
+    await window.ic.plug.createActor({
+      canisterId: u.toString(),
+      interfaceFactory: _0
+    }).icrc1_transfer(u, a);
   }
   async whoAmI() {
     return this.getPrincipal();
@@ -6823,7 +6831,7 @@ class Ie {
           canisterId: u,
           agent: C
         });
-        this.state.anonCanisterActors[u] = b;
+        return this.state.anonCanisterActors[u] = b, b;
       }
       return this.state.anonCanisterActors[u];
     } catch (C) {
@@ -6852,7 +6860,7 @@ class Ie {
           canisterId: u,
           idl: a
         });
-        return this.state.anonCanisterActors[u] = E, E;
+        return this.state.anonCanisterActors[u] = await E, E;
       } else
         return this.state.anonCanisterActors[u];
     else {
