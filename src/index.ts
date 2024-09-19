@@ -4,6 +4,7 @@ import { createPNP, walletsList } from './pnp';
 import { BatchTransact } from "./utils/batchTransact";
 import { getAccountIdentifier } from './utils/identifierUtils.js';
 import { HOSTURL, NNS_CANISTER_ID } from './constants';
+import { type PNP } from './pnp/index';
 
 const principalIdFromHex = getAccountIdentifier;
 

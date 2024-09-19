@@ -144,37 +144,42 @@ export namespace ICRC {
 }
 
 export namespace Adapter {
-  export abstract class Interface {
-    constructor(url: string);
-    url: string;
-    wallets: Wallet.AdapterInfo[];
-    state: Wallet.WalletState;
-    abstract isAvailable(): Promise<boolean>;
-    abstract connect(config: Wallet.AdapterConfig): Promise<Wallet.Account>;
-    abstract disconnect(): Promise<void>;
-    abstract createActor<T>(
+  export interface Interface {
+    // Checks if the wallet is available (e.g., installed and accessible)
+    isAvailable(): Promise<boolean>;
+
+    // Connects to the wallet using the provided configuration
+    connect(config: Wallet.PNPConfig): Promise<Wallet.Account | boolean>;
+
+    // Disconnects from the wallet
+    disconnect(): Promise<void>;
+
+    // Creates an actor for a canister with the specified IDL
+    createActor<T>(
       canisterId: string,
       idl: any
     ): Promise<ActorSubclass<T>>;
-    abstract getAccountId(): Promise<string | null>;
-    abstract getPrincipal(): Promise<Principal | null>;
-    abstract getBalance(): Promise<bigint>;
-    abstract createAgent(options?: {
-      whitelist: string[];
+
+    // Creates an agent for communication with the Internet Computer
+    createAgent(options: {
+      whitelist?: string[];
       host?: string;
     }): Promise<void>;
-    abstract icrc1BalanceOf(
+
+    // Retrieves the ICRC-1 token balance of the specified account
+    icrc1BalanceOf(
       canisterId: string,
-      account?: Wallet.Account
-    ): Promise<BigInt>;
-    abstract icrc1Transfer(
-      canisterId,
+      account: Wallet.Account
+    ): Promise<bigint>;
+
+    // Performs a transfer of ICRC-1 tokens
+    icrc1Transfer(
+      canisterId: Principal | string,
       params: Wallet.TransferParams
-    ): Promise<void>;
-    abstract icrc1Metadata(canisterId: string): Promise<any>;
-    abstract requestTransfer(params: Wallet.TransferParams): Promise<any>;
-    abstract isConnected(): Promise<boolean | undefined>;
-    abstract whoAmI(): Promise<Principal | null>;
+    ): Promise<any>;
+
+    // A string representing the URL to the wallet's website or download page
+    url: string;
   }
 }
 

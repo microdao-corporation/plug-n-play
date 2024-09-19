@@ -9,26 +9,29 @@ declare class PNP {
         canisterActors: Record<string, ActorSubclass<any>>;
         anonCanisterActors: Record<string, ActorSubclass<any>>;
         config: Wallet.PNPConfig;
-        callbacks: Wallet.WalletEventCallback[];
     };
     constructor(config?: Wallet.PNPConfig);
     getAccountId(): string | null;
     getPrincipalId(): Principal | null;
     connect(walletId: string): Promise<Wallet.Account>;
     disconnect(): Promise<void>;
-    icrc1BalanceOf(canisterId: string, account: Wallet.Account): Promise<BigInt>;
-    icrc1Transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<any>;
-    icrc1Metadata(canisterId: string): Promise<any>;
-    getActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>>;
-    getSignedActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>>;
-    getCanisterActor<T>(canisterId: string, idl: any, isAnon?: boolean, isForced?: boolean, isSigned?: boolean): Promise<ActorSubclass<T>>;
+    callCanister<T>(canisterId: string, methodName: string, args?: any[], idl?: any, options?: {
+        isAnon?: boolean;
+        isSigned?: boolean;
+    }): Promise<T>;
+    getActor<T>(canisterId: string, idl: any, options?: {
+        isAnon?: boolean;
+        isForced?: boolean;
+        isSigned?: boolean;
+    }): Promise<ActorSubclass<T>>;
+    private createAnonymousActor;
+    private createSignedActor;
     createAgent(options?: {
-        whitelist: string[];
+        whitelist?: string[];
         host?: string;
     }): Promise<void>;
     isWalletConnected(): boolean;
-    activeWallet(): string | null;
-    registerCallback(callback: Wallet.WalletEventCallback): void;
+    activeWallet(): Wallet.Account | null;
 }
 export declare const walletsList: Wallet.AdapterInfo[];
 export declare const createPNP: (config?: Wallet.PNPConfig) => PNP;

@@ -18,7 +18,6 @@ class PNP {
     canisterActors: Record<string, ActorSubclass<any>>;
     anonCanisterActors: Record<string, ActorSubclass<any>>;
     config: Wallet.PNPConfig;
-    callbacks: Wallet.WalletEventCallback[];
   };
 
   constructor(config: Wallet.PNPConfig = {}) {
@@ -34,181 +33,170 @@ class PNP {
         identityProvider: config.identityProvider,
         ...config,
       },
-      callbacks: [],
     };
   }
 
   getAccountId(): string | null {
-    if (!this.state.provider) return null;
-    const principalId = this.state.account?.owner?.toString() || "";
-    const id = getAccountIdentifier(principalId);
-    return id || null;
+    if (!this.state.provider || !this.state.account) return null;
+    const principalId = this.state.account.owner.toString();
+    return getAccountIdentifier(principalId) || null;
   }
 
   getPrincipalId(): Principal | null {
-    return this.state.provider ? this.state.account!.owner : null;
+    return this.state.provider && this.state.account
+      ? this.state.account.owner
+      : null;
   }
 
   async connect(walletId: string): Promise<Wallet.Account> {
     const selectedWallet = walletsList.find((w) => w.id === walletId);
-    if (!selectedWallet) throw new Error("Selected wallet not found");
+    if (!selectedWallet)
+      throw new Error(`Wallet with ID "${walletId}" not found.`);
 
     const walletInstance = new selectedWallet.adapter();
-    if (!(await walletInstance.isAvailable())) {
-      window.open(walletInstance.url, "_blank");
-      throw new Error("Wallet not available");
+    const isAvailable = await walletInstance.isAvailable();
+
+    if (!isAvailable) {
+      throw new Error(
+        `Wallet "${walletId}" is not available. Please install or enable it.`
+      );
     }
 
     const connectionResult = await walletInstance.connect(this.state.config);
     if (!connectionResult || typeof connectionResult === "boolean") {
-      throw new Error("Error connecting to wallet");
+      throw new Error(`Failed to connect to wallet "${walletId}".`);
     }
 
-    this.state = {
-      ...this.state,
-      account: connectionResult,
-      activeWallet: walletId,
-      provider: walletInstance,
-    };
+    this.state.account = connectionResult;
+    this.state.activeWallet = walletId;
+    this.state.provider = walletInstance;
 
     localStorage.setItem(this.state.config.localStorageKey, walletId);
-
     return connectionResult;
   }
 
   async disconnect(): Promise<void> {
     if (this.state.provider) await this.state.provider.disconnect();
     localStorage.removeItem(this.state.config.localStorageKey);
-    this.state = {
-      ...this.state,
-      account: null,
-      activeWallet: null,
-      provider: null,
-      canisterActors: {},
-      anonCanisterActors: {},
-    };
+    this.state.account = null;
+    this.state.activeWallet = null;
+    this.state.provider = null;
+    this.state.canisterActors = {};
+    this.state.anonCanisterActors = {};
   }
 
-  async icrc1BalanceOf(canisterId: string, account: Wallet.Account): Promise<BigInt> {
-    if (!this.state.provider) throw new Error("Wallet not connected");
-    return await this.state.provider.icrc1BalanceOf(canisterId, account);
-  }
+  async callCanister<T>(
+    canisterId: string,
+    methodName: string,
+    args: any[] = [],
+    idl?: any,
+    options?: {
+      isAnon?: boolean;
+      isSigned?: boolean;
+    }
+  ): Promise<T> {
+    const { isAnon = false, isSigned = false } = options || {};
 
-  async icrc1Transfer(canisterId: Principal, params: Wallet.TransferParams): Promise<any> {
-    if (!this.state.provider) throw new Error("Wallet not connected");
-    return await this.state.provider.icrc1Transfer(canisterId, params);
-  }
+    if (!this.state.provider && !isAnon) {
+      throw new Error("Wallet not connected");
+    }
 
-  async icrc1Metadata(canisterId: string): Promise<any> {
-    if (!this.state.provider) throw new Error("Wallet not connected");
-    const actor = await this.state.provider.createActor(canisterId, ICRC1_IDL);
-    // @ts-ignore
-    return await actor.icrc1_metadata();
-  }
-
-  async getActor<T>(canisterId: string, idl: any): Promise<ActorSubclass<T>> {
     try {
-      if (!this.state?.provider) {
-        if (!(canisterId in this.state.anonCanisterActors)) {
-          const pubAgent = HttpAgent.createSync({
-            identity: new AnonymousIdentity(),
-            host: this.state.config.hostUrl,
-          });
-          if (this.state.config.hostUrl?.includes("localhost")) {
-            await pubAgent.fetchRootKey();
-          }
-          const actor = await Actor.createActor(idl, {
-            canisterId,
-            agent: pubAgent,
-          });
-          this.state.anonCanisterActors[canisterId] = actor as ActorSubclass<T>;
-          return actor as ActorSubclass<T>;
-        }
-        return this.state.anonCanisterActors[canisterId] as ActorSubclass<T>;
-      } else {
-        return await this.getSignedActor<T>(canisterId, idl);
+      const actor = await this.getActor(canisterId, idl || ICRC1_IDL, {
+        isAnon,
+        isSigned,
+      });
+
+      if (typeof actor[methodName] !== "function") {
+        throw new Error(
+          `Method "${methodName}" not found on canister "${canisterId}"`
+        );
       }
+
+      return await actor[methodName](...args);
     } catch (error) {
-      console.error("Error creating actor:", error);
+      console.error(
+        `Error calling method "${methodName}" on canister "${canisterId}":`,
+        error
+      );
       throw error;
     }
   }
 
-  async getSignedActor<T>(
+  async getActor<T>(
+    canisterId: string,
+    idl: any,
+    options?: {
+      isAnon?: boolean;
+      isForced?: boolean;
+      isSigned?: boolean;
+    }
+  ): Promise<ActorSubclass<T>> {
+    const { isAnon = false, isForced = false, isSigned = false } = options || {};
+
+    if (isSigned) {
+      return this.createSignedActor<T>(canisterId, idl);
+    }
+
+    const actorCache = isAnon
+      ? this.state.anonCanisterActors
+      : this.state.canisterActors;
+    if (!isForced && actorCache[canisterId]) {
+      return actorCache[canisterId] as ActorSubclass<T>;
+    }
+
+    const actor = isAnon
+      ? await this.createAnonymousActor<T>(canisterId, idl)
+      : await this.createSignedActor<T>(canisterId, idl);
+
+    actorCache[canisterId] = actor;
+    return actor;
+  }
+
+  private async createAnonymousActor<T>(
+    canisterId: string,
+    idl: any
+  ): Promise<ActorSubclass<T>> {
+    const agent = await HttpAgent.create({
+      identity: new AnonymousIdentity(),
+      host: this.state.config.hostUrl,
+    });
+    if (this.state.config.hostUrl?.includes("localhost")) {
+      await agent.fetchRootKey();
+    }
+    return Actor.createActor<T>(idl, { agent, canisterId });
+  }
+
+  private async createSignedActor<T>(
     canisterId: string,
     idl: any
   ): Promise<ActorSubclass<T>> {
     if (!this.state.provider) throw new Error("Wallet not connected");
-    try {
-      return await this.state.provider.createActor<T>(canisterId, idl);
-    } catch (error) {
-      console.error("Error creating signed actor:", error);
-      throw error;
-    }
+    return this.state.provider.createActor<T>(canisterId, idl);
   }
 
-  async getCanisterActor<T>(
-    canisterId: string,
-    idl: any,
-    isAnon: boolean = false,
-    isForced: boolean = false,
-    isSigned: boolean = false
-  ): Promise<ActorSubclass<T>> {
-    if (isSigned) return this.getSignedActor(canisterId, idl);
-
-    if (isAnon) {
-      if (isForced || !this.state.anonCanisterActors[canisterId]) {
-        const pubAgent = HttpAgent.createSync({
-          identity: new AnonymousIdentity(),
-          host: this.state.config.hostUrl,
-        });
-        if (this.state.config.hostUrl?.includes("localhost")) {
-          await pubAgent.fetchRootKey();
-        }
-        const actor = this.state.provider.createActor<T>(idl, {
-          canisterId,
-          idl
-        });
-        this.state.anonCanisterActors[canisterId] = await actor as ActorSubclass<T>;
-        return actor;
-      } else {
-        return this.state.anonCanisterActors[canisterId] as ActorSubclass<T>;
-      }
-    } else {
-      if (!this.state.provider) throw new Error("Wallet not connected");
-      if (isForced || !this.state.canisterActors[canisterId]) {
-        const actor = await this.state.provider.createActor<T>(canisterId, idl);
-        this.state.canisterActors[canisterId] = actor;
-        return actor;
-      } else {
-        return this.state.canisterActors[canisterId] as ActorSubclass<T>;
-      }
-    }
-  }
-
-  createAgent(options?: { whitelist: string[]; host?: string }): Promise<void> {
+  async createAgent(options?: { whitelist?: string[]; host?: string }): Promise<void> {
     if (options?.host) {
       this.state.config.hostUrl = options.host;
     } else {
       options = {
-        whitelist: this.state.config.whitelist,
+        whitelist: this.state.config.whitelist || [],
         host: this.state.config.hostUrl,
       };
     }
     if (!this.state.provider) throw new Error("Wallet not connected");
-    return this.state.provider.createAgent(options);
+    await this.state.provider.createAgent({
+      whitelist: options.whitelist || [],
+      host: options.host,
+    });
   }
 
   isWalletConnected(): boolean {
     return !!this.state.activeWallet;
   }
 
-  activeWallet(): string | null {
-    return this.state.activeWallet;
-  }
-
-  registerCallback(callback: Wallet.WalletEventCallback): void {
-    this.state.callbacks.push(callback);
+  activeWallet(): Wallet.Account | null {
+    return this.state.account;
   }
 }
 
