@@ -29,12 +29,12 @@
   "dependencies": {
     "@astrox/sdk-web": "^0.1.41",
     "@astrox/sdk-webview": "^0.1.41",
-    "@dfinity/agent": "^2.1.0",
-    "@dfinity/auth-client": "^2.1.0",
-    "@dfinity/candid": "^2.1.0",
-    "@dfinity/identity": "^2.1.0",
-    "@dfinity/principal": "^2.1.0",
-    "@dfinity/utils": "^2.5.0",
+    "@dfinity/agent": "^2.1.2",
+    "@dfinity/auth-client": "^2.1.2",
+    "@dfinity/candid": "^2.1.2",
+    "@dfinity/identity": "^2.1.2",
+    "@dfinity/principal": "^2.1.2",
+    "@dfinity/utils": "^2.5.1",
     "@fort-major/msq-client": "^0.3.22",
     "@fort-major/msq-shared": "^0.3.5",
     "buffer": "^6.0.3",
@@ -43,12 +43,12 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
-    "@vitest/coverage-v8": "^2.1.0",
-    "jsdom": "^25.0.0",
-    "vite": "^5.4.4",
-    "vite-plugin-dts": "^4.2.1",
+    "@vitest/coverage-v8": "^2.1.2",
+    "jsdom": "^25.0.1",
+    "vite": "^5.4.8",
+    "vite-plugin-dts": "^4.2.3",
     "vite-plugin-static-copy": "^1.0.6",
-    "vitest": "^2.1.0"
+    "vitest": "^2.1.2"
   },
   "engines": {
     "pnpm": ">=9.0.0",
