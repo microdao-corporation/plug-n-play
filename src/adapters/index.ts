@@ -13,12 +13,12 @@ export const walletList: Wallet.AdapterInfo[] = [
     icon: dfinityLogo,
     adapter: NNSAdapter,
   },
-  // {
-  //   id: "plug",
-  //   name: "Plug Wallet",
-  //   icon: plugLogo,
-  //   adapter: PlugAdapter,
-  // },
+  {
+    id: "plug",
+    name: "Plug Wallet",
+    icon: plugLogo,
+    adapter: PlugAdapter,
+  },
 
 ];
 

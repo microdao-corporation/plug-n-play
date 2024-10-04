@@ -166,12 +166,6 @@ export namespace Adapter {
       host?: string;
     }): Promise<void>;
 
-    // Retrieves the ICRC-1 token balance of the specified account
-    icrc1BalanceOf(
-      canisterId: string,
-      account: Wallet.Account
-    ): Promise<bigint>;
-
     // Performs a transfer of ICRC-1 tokens
     icrc1Transfer(
       canisterId: Principal | string,

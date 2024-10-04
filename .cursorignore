@@ -1,0 +1,5 @@
+dist
+.vscode
+.github
+coverage
+node_modules

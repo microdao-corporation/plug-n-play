@@ -1,6 +1,6 @@
 // src/adapters/NNSAdapter.ts
 
-import { Actor, HttpAgent, type ActorSubclass } from "@dfinity/agent";
+import { Actor, HttpAgent, type ActorSubclass, Identity } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import type { Wallet, Adapter } from "../types/index";
 import { Principal } from "@dfinity/principal";
@@ -12,32 +12,50 @@ export class NNSAdapter implements Adapter.Interface {
   url: string;
 
   // Internal properties
-  private authClient: AuthClient | null;
-  private agent: HttpAgent | null;
+  private authClient: AuthClient | null = null;
+  private agent: HttpAgent | null = null;
+  private whitelist: string[] = [];
 
   constructor() {
-    // Set the default identity provider URL for NNS
     this.url = "https://identity.ic0.app";
-    this.authClient = null;
-    this.agent = null;
+  }
+
+  // Helper method to initialize the AuthClient
+  private async initAuthClient(): Promise<void> {
+    if (!this.authClient) {
+      this.authClient = await AuthClient.create({
+        idleOptions: {
+          idleTimeout: 1000 * 60 * 60 * 24 * 7, // 7 days
+          disableDefaultIdleCallback: true, // Disable default reload behavior
+        },
+      });
+      this.authClient.idleManager?.registerCallback?.(() => this.refreshLogin());
+    }
+  }
+
+  // Helper method to initialize the HttpAgent
+  private async initAgent(identity: Identity, host: string): Promise<void> {
+    this.agent = await HttpAgent.create({
+      identity,
+      host,
+    });
+    if (host.includes("localhost") || host.includes("127.0.0.1")) {
+      await this.agent.fetchRootKey();
+    }
   }
 
   // Checks if the wallet is available
   async isAvailable(): Promise<boolean> {
-    if (!this.authClient) {
-      this.authClient = await AuthClient.create();
-    }
+    await this.initAuthClient();
     // NNS is always available since it's a web-based identity provider
     return true;
   }
 
   // Connects to the wallet using the provided configuration
-  async connect(config: Wallet.PNPConfig): Promise<Wallet.Account | boolean> {
-    if (!this.authClient) {
-      this.authClient = await AuthClient.create();
-    }
+  async connect(config: Wallet.PNPConfig): Promise<Wallet.Account> {
+    await this.initAuthClient();
 
-    const isAuthenticated = await this.authClient.isAuthenticated();
+    const isAuthenticated = await this.authClient!.isAuthenticated();
 
     if (!isAuthenticated) {
       return new Promise<Wallet.Account>((resolve, reject) => {
@@ -45,6 +63,8 @@ export class NNSAdapter implements Adapter.Interface {
           identityProvider: config.identityProvider || this.url,
           onSuccess: async () => {
             try {
+              // Set the whitelist based on config or default
+              this.whitelist = config.whitelist || [];
               const account = await this._continueLogin(config.hostUrl || this.url);
               resolve(account);
             } catch (error) {
@@ -58,6 +78,7 @@ export class NNSAdapter implements Adapter.Interface {
       });
     } else {
       // User is already authenticated, proceed with login
+      this.whitelist = config.whitelist || [];
       return this._continueLogin(config.hostUrl || this.url);
     }
   }
@@ -66,14 +87,7 @@ export class NNSAdapter implements Adapter.Interface {
     try {
       const identity = this.authClient!.getIdentity();
       const principal = identity.getPrincipal();
-      this.agent = await HttpAgent.create({
-        identity,
-        host,
-      });
-      // Fetch the root key in development mode
-      if (host.includes("localhost") || host.includes("127.0.0.1")) {
-        await this.agent.fetchRootKey();
-      }
+      await this.initAgent(identity, host);
       return {
         owner: principal,
         subaccount: principalToSubAccount(principal),
@@ -84,12 +98,32 @@ export class NNSAdapter implements Adapter.Interface {
     }
   }
 
+  private async refreshLogin(): Promise<void> {
+    try {
+      // Re-authenticate the user
+      await this.authClient!.login({
+        onSuccess: async () => {
+          const identity = this.authClient!.getIdentity();
+          await this.initAgent(identity, this.url);
+        },
+        onError: (error) => {
+          console.error("Error during refreshLogin:", error);
+          throw error;
+        },
+      });
+    } catch (error) {
+      console.error("Error during refreshLogin:", error);
+      throw error;
+    }
+  }
+
   // Disconnects from the wallet
   async disconnect(): Promise<void> {
     if (this.authClient) {
       await this.authClient.logout();
       this.agent = null;
       this.authClient = null;
+      this.whitelist = []; // Clear the whitelist on disconnect
     }
   }
 
@@ -111,18 +145,13 @@ export class NNSAdapter implements Adapter.Interface {
 
   // Creates an agent for communication with the Internet Computer
   async createAgent(options: { whitelist?: string[]; host?: string }): Promise<void> {
-    if (!this.authClient) {
-      throw new Error("AuthClient is not initialized");
-    }
-
-    const identity = this.authClient.getIdentity();
+    await this.initAuthClient();
+    const identity = this.authClient!.getIdentity();
     const host = options.host || this.url;
-    this.agent = await HttpAgent.create({
-      identity,
-      host,
-    });
-    if (host.includes("localhost") || host.includes("127.0.0.1")) {
-      await this.agent.fetchRootKey();
+    await this.initAgent(identity, host);
+    // Update the whitelist if provided
+    if (options.whitelist) {
+      this.whitelist = options.whitelist;
     }
   }
 
