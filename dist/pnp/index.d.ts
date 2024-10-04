@@ -26,10 +26,6 @@ declare class PNP {
     }): Promise<ActorSubclass<T>>;
     private createAnonymousActor;
     private createSignedActor;
-    createAgent(options?: {
-        whitelist?: string[];
-        host?: string;
-    }): Promise<void>;
     isWalletConnected(): boolean;
     activeWallet(): Wallet.Account | null;
 }

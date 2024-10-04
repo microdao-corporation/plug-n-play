@@ -54,10 +54,9 @@ describe('Token and Account Identifier Utilities', () => {
       expect(accountId).toHaveLength(64);
     });
 
-    it('should return false for invalid principal ID', () => {
+    it('should throw an error for invalid principal ID', () => {
       const invalidPrincipalId = 'invalid-principal-id';
-      const accountId = getAccountIdentifier(invalidPrincipalId);
-      expect(accountId).toBe(false);
+      expect(() => getAccountIdentifier(invalidPrincipalId)).toThrow(Error);
     });
 
     it('should generate different identifiers for different principals', () => {

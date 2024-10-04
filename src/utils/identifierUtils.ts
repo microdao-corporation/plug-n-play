@@ -2,6 +2,7 @@ import { Principal } from '@dfinity/principal';
 import crc32 from 'buffer-crc32';
 import { Buffer } from 'buffer';
 import crypto from 'crypto-js';
+import { err } from '@fort-major/msq-shared';
 
 // Global declarations
 declare global {
@@ -97,7 +98,7 @@ const getAccountIdentifier = (
     sha.update(byteArrayToWordArray(principal.toUint8Array()));
     const subBuffer = Buffer.from(SUB_ACCOUNT_ZERO);
     if (subAccount) {
-      subBuffer.writeUInt32BE(Number(subAccount));
+      subBuffer.writeUInt32BE(Number(subAccount), 0);
     }
     sha.update(byteArrayToWordArray(subBuffer));
     const hash = sha.finalize();
@@ -105,8 +106,7 @@ const getAccountIdentifier = (
     const checksum = generateChecksum(byteArray);
     return checksum + hash.toString();
   } catch (error) {
-    console.error(error);
-    return false;
+    throw new Error(error);
   }
 };
 

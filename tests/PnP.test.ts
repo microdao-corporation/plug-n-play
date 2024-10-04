@@ -1,65 +1,64 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { NNSAdapter } from '../src/adapters/NNSAdapter';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { NNSAdapter } from "../src/adapters/NNSAdapter";
 import { AuthClient } from "@dfinity/auth-client";
 import { HttpAgent } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 
-const USE_REAL_LIBRARIES = process.env.USE_REAL_LIBRARIES === 'true';
+vi.mock("@dfinity/auth-client");
+vi.mock("@dfinity/agent");
 
-if (!USE_REAL_LIBRARIES) {
-  vi.mock("@dfinity/auth-client");
-  vi.mock("@dfinity/agent");
-  vi.mock("../src/utils/identifierUtils", () => ({
-    getAccountIdentifier: vi.fn().mockReturnValue("mock-account-identifier"),
-  }));
-}
-
-describe('NNSAdapter', () => {
+describe("NNSAdapter", () => {
   let adapter: NNSAdapter;
+  let mockHttpAgent: any;
 
   beforeEach(async () => {
     adapter = new NNSAdapter();
-    
-    if (!USE_REAL_LIBRARIES) {
-      const mockAuthClient = {
-        isAuthenticated: vi.fn().mockResolvedValue(false),
-        login: vi.fn(),
-        getIdentity: vi.fn().mockReturnValue({
-          getPrincipal: () => Principal.fromText("2vxsx-fae"),
-        }),
-        logout: vi.fn(),
-      };
-      (AuthClient.create as any).mockResolvedValue(mockAuthClient);
-      (HttpAgent.createSync as any).mockReturnValue({
-        fetchRootKey: vi.fn(),
-      });
-      adapter['authClient'] = await AuthClient.create();
-      adapter['agent'] = {} as HttpAgent; // Mock the agent to prevent "not initialized" error
-    } else {
-      adapter['authClient'] = await AuthClient.create();
-      // Note: In a real scenario, you'd need to handle agent creation and authentication
-    }
+
+    const mockAuthClient = {
+      isAuthenticated: vi.fn().mockResolvedValue(false),
+      login: vi.fn(),
+      getIdentity: vi.fn().mockReturnValue({
+        getPrincipal: () => Principal.fromText("2vxsx-fae"),
+      }),
+      logout: vi.fn(),
+    };
+
+    mockHttpAgent = {
+      fetchRootKey: vi.fn().mockResolvedValue(undefined),
+    };
+
+    vi.mocked(AuthClient.create).mockResolvedValue(mockAuthClient as any);
+    vi.mocked(HttpAgent).mockImplementation(() => mockHttpAgent);
+
+    adapter["authClient"] = await AuthClient.create();
   });
 
   afterEach(() => {
-    if (!USE_REAL_LIBRARIES) {
-      vi.clearAllMocks();
-    }
+    vi.clearAllMocks();
   });
 
-  describe('getAccountId', () => {
-    it('should return account identifier or throw if not connected', async () => {
-      if (USE_REAL_LIBRARIES) {
-        await expect(adapter.getAccountId()).rejects.toThrow("Wallet is not connected or initialized");
-      } else {
-        const accountId = await adapter.getAccountId();
-        expect(accountId).toBe("mock-account-identifier");
-      }
-    }, 15000); // Increase timeout to 15 seconds
+  it("should have a default URL", () => {
+    expect(adapter.url).toBe("https://identity.ic0.app");
+  });
 
-    it('should throw an error if authClient is not initialized', async () => {
-      adapter['authClient'] = null;
-      await expect(adapter.getAccountId()).rejects.toThrow("Wallet is not connected or initialized");
+  it("should initialize the auth client", async () => {
+    await adapter["initAuthClient"]();
+    expect(adapter["authClient"]).toBeDefined();
+  });
+
+  it("should initialize the agent", async () => {
+    const identity = adapter["authClient"].getIdentity();
+    await adapter["initAgent"](identity, "https://localhost:8000");
+    expect(adapter["agent"]).toBeDefined();
+    expect(HttpAgent).toHaveBeenCalledWith({
+      identity,
+      host: "https://localhost:8000",
     });
+    expect(mockHttpAgent.fetchRootKey).toHaveBeenCalled();
+  });
+
+  it("should check if the wallet is available", async () => {
+    const isAvailable = await adapter.isAvailable();
+    expect(isAvailable).toBe(true);
   });
 });

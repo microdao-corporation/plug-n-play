@@ -24,7 +24,7 @@ const createPNP = vi.fn().mockImplementation(() => ({
 }));
 
 // Mock the entire index module
-vi.mock('../index', () => ({
+vi.mock('../src/index', () => ({
   createPNP,
   walletsList: [
     { id: 'nns', name: 'Internet Identity', icon: '/assets/dfinity.svg', adapter: expect.any(Function) },
@@ -42,11 +42,11 @@ vi.mock('../index', () => ({
 }));
 
 describe('index.ts', () => {
-  let indexModule: typeof import('../index');
+  let indexModule: typeof import('../src/index');
 
   beforeEach(async () => {
     vi.resetModules();
-    indexModule = await import('../index');
+    indexModule = await import('../src/index');
   });
 
   it('should export createPNP', () => {
@@ -99,7 +99,7 @@ describe('index.ts', () => {
         },
       } as any;
 
-      indexModule = await import("../index");
+      indexModule = await import("../src/index");
     });
 
     afterEach(() => {
