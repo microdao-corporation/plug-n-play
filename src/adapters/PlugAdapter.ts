@@ -52,7 +52,7 @@ export class PlugAdapter implements Adapter.Interface {
         const connected = await window.ic!.plug!.requestConnect({
           whitelist: config.whitelist || [],
           host: config.hostUrl || "https://mainnet.dfinity.network",
-          timeout: config.timeout || 60000,
+          timeout: config.timeout || 1000 * 60 * 60 * 24 * 7,
           onConnectionUpdate: this.handleConnectionUpdate.bind(this),
         });
         if (!connected) {

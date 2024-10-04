@@ -10,11 +10,11 @@ import { principalToSubAccount } from "@dfinity/utils";
 export class NNSAdapter implements Adapter.Interface {
   // Required property from Adapter.Interface
   url: string;
+  config: Wallet.PNPConfig;
 
   // Internal properties
   private authClient: AuthClient | null = null;
   private agent: HttpAgent | null = null;
-  private whitelist: string[] = [];
 
   constructor() {
     this.url = "https://identity.ic0.app";
@@ -25,7 +25,7 @@ export class NNSAdapter implements Adapter.Interface {
     if (!this.authClient) {
       this.authClient = await AuthClient.create({
         idleOptions: {
-          idleTimeout: 1000 * 60 * 60 * 24 * 7, // 7 days
+          idleTimeout: this.config.timeout || 1000 * 60 * 60 * 24 * 7, // 7 days
           disableDefaultIdleCallback: true, // Disable default reload behavior
         },
       });
@@ -51,13 +51,13 @@ export class NNSAdapter implements Adapter.Interface {
 
   // Checks if the wallet is available
   async isAvailable(): Promise<boolean> {
-    await this.initAuthClient();
     // NNS is always available since it's a web-based identity provider
     return true;
   }
 
   // Connects to the wallet using the provided configuration
   async connect(config: Wallet.PNPConfig): Promise<Wallet.Account> {
+    this.config = config;
     await this.initAuthClient();
 
     const isAuthenticated = await this.authClient!.isAuthenticated();
@@ -68,8 +68,6 @@ export class NNSAdapter implements Adapter.Interface {
           identityProvider: config.identityProvider || this.url,
           onSuccess: async () => {
             try {
-              // Set the whitelist based on config or default
-              this.whitelist = config.whitelist || [];
               const account = await this._continueLogin(config.hostUrl || this.url);
               resolve(account);
             } catch (error) {
@@ -83,7 +81,6 @@ export class NNSAdapter implements Adapter.Interface {
       });
     } else {
       // User is already authenticated, proceed with login
-      this.whitelist = config.whitelist || [];
       return this._continueLogin(config.hostUrl || this.url);
     }
   }
@@ -128,7 +125,7 @@ export class NNSAdapter implements Adapter.Interface {
       await this.authClient.logout();
       this.agent = null;
       this.authClient = null;
-      this.whitelist = []; // Clear the whitelist on disconnect
+      this.config = {};
     }
   }
 
@@ -154,10 +151,6 @@ export class NNSAdapter implements Adapter.Interface {
     const identity = this.authClient!.getIdentity();
     const host = options.host || this.url;
     await this.initAgent(identity, host);
-    // Update the whitelist if provided
-    if (options.whitelist) {
-      this.whitelist = options.whitelist;
-    }
   }
 
   // Retrieves the ICRC-1 token balance of the specified account

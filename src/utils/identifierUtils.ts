@@ -98,7 +98,7 @@ const getAccountIdentifier = (
     sha.update(byteArrayToWordArray(principal.toUint8Array()));
     const subBuffer = Buffer.from(SUB_ACCOUNT_ZERO);
     if (subAccount) {
-      subBuffer.writeUInt32BE(Number(subAccount));
+      subBuffer.writeUInt32BE(Number(subAccount), 0);
     }
     sha.update(byteArrayToWordArray(subBuffer));
     const hash = sha.finalize();
