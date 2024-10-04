@@ -79,14 +79,6 @@ describe('index.ts', () => {
     expect(indexModule.getPNPAdapter).toBeDefined();
   });
 
-  // describe('getPNPAdapter', () => {
-  //   beforeEach(() => {
-  //     vi.clearAllMocks();
-  //   });
-
-    
-  // });
-
   describe("browser environment", () => {
     const originalWindow = globalThis.window;
 
