@@ -35,12 +35,17 @@ export class NNSAdapter implements Adapter.Interface {
 
   // Helper method to initialize the HttpAgent
   private async initAgent(identity: Identity, host: string): Promise<void> {
-    this.agent = await HttpAgent.create({
+    this.agent = new HttpAgent({
       identity,
       host,
     });
     if (host.includes("localhost") || host.includes("127.0.0.1")) {
-      await this.agent.fetchRootKey();
+      try {
+        await this.agent.fetchRootKey();
+      } catch (e) {
+        console.warn("Unable to fetch root key. Check to ensure that your local replica is running");
+        console.error(e);
+      }
     }
   }
 
