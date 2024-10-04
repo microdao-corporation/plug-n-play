@@ -175,22 +175,6 @@ class PNP {
     return this.state.provider.createActor<T>(canisterId, idl);
   }
 
-  async createAgent(options?: { whitelist?: string[]; host?: string }): Promise<void> {
-    if (options?.host) {
-      this.state.config.hostUrl = options.host;
-    } else {
-      options = {
-        whitelist: this.state.config.whitelist || [],
-        host: this.state.config.hostUrl,
-      };
-    }
-    if (!this.state.provider) throw new Error("Wallet not connected");
-    await this.state.provider.createAgent({
-      whitelist: options.whitelist || [],
-      host: options.host,
-    });
-  }
-
   isWalletConnected(): boolean {
     return !!this.state.activeWallet;
   }

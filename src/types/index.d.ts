@@ -85,36 +85,6 @@ export namespace Wallet {
     }
   }
 
-  // Plug-specific methods
-  export interface PlugInterface {
-    requestConnect: (params: any) => Promise<any>;
-    isConnected: () => Promise<boolean>;
-    createActor: <T>(options: {
-      canisterId: string;
-      interfaceFactory: any;
-    }) => Promise<ActorSubclass<T>>;
-    requestBalance: () => Promise<
-      Array<{
-        amount: number;
-        currency: string;
-        image: string;
-        name: string;
-        value: number;
-      }>
-    >;
-    requestTransfer: (params: TransferParams) => Promise<{ height: number }>;
-    requestTransferToken: (params: any) => Promise<any>;
-    requestBurnXTC: (params: { to: string; amount: number }) => Promise<any>;
-    batchTransactions: (transactions: Transaction.Item[]) => Promise<any>;
-    createAgent: (options?: {
-      whitelist: string[];
-      host?: string;
-    }) => Promise<void>;
-    disconnect: () => Promise<void>;
-    accountId: string;
-    principalId: string;
-  }
-
   // Bitfinity-specific methods
   export interface BitfinityInterface {
     getUserAssets: () => Promise<any>;
@@ -147,31 +117,20 @@ export namespace Adapter {
   export interface Interface {
     // Checks if the wallet is available (e.g., installed and accessible)
     isAvailable(): Promise<boolean>;
-
     // Connects to the wallet using the provided configuration
     connect(config: Wallet.PNPConfig): Promise<Wallet.Account | boolean>;
-
     // Disconnects from the wallet
     disconnect(): Promise<void>;
-
     // Creates an actor for a canister with the specified IDL
     createActor<T>(
       canisterId: string,
       idl: any
     ): Promise<ActorSubclass<T>>;
-
-    // Creates an agent for communication with the Internet Computer
-    createAgent(options: {
-      whitelist?: string[];
-      host?: string;
-    }): Promise<void>;
-
     // Performs a transfer of ICRC-1 tokens
     icrc1Transfer(
       canisterId: Principal | string,
       params: Wallet.TransferParams
     ): Promise<any>;
-
     // A string representing the URL to the wallet's website or download page
     url: string;
   }
@@ -180,9 +139,35 @@ export namespace Adapter {
 declare global {
   interface Window {
     ic?: {
-      plug?: Wallet.PlugInterface;
-      infinityWallet?: Wallet.BitfinityInterface;
+      plug?: {
+        requestConnect: (options?: {
+          whitelist?: string[];
+          host?: string;
+          timeout?: number;
+          onConnectionUpdate?: () => void;
+        }) => Promise<boolean>;
+        isConnected: () => Promise<boolean>;
+        createActor: <T>(options: {
+          canisterId: string;
+          interfaceFactory: any;
+        }) => Promise<ActorSubclass<T>>;
+        requestBalance: () => Promise<
+          Array<{
+            amount: number;
+            currency: string;
+            image: string;
+            name: string;
+            value: number;
+          }>
+        >;
+        requestTransfer: (params: Wallet.TransferParams) => Promise<{ height: number }>;
+        requestTransferToken: (params: any) => Promise<any>;
+        requestBurnXTC: (params: { to: string; amount: number }) => Promise<any>;
+        batchTransactions: (transactions: Wallet.Transaction.Item[]) => Promise<any>;
+        disconnect: () => Promise<void>;
+        principalId?: string;
+        accountId?: string;
+      };
     };
-    pnp: Wallet.PNPWindow;
   }
 }

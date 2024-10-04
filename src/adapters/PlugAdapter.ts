@@ -3,45 +3,7 @@
 import { ActorSubclass } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 import { Adapter, Wallet } from "../types";
-import { hexStringToUint8Array } from "@dfinity/utils";
 import { ICRC1_IDL } from "../did/icrc1.idl.js";
-
-declare global {
-  interface Window {
-    ic?: {
-      plug?: {
-        requestConnect: (options?: {
-          whitelist?: string[];
-          host?: string;
-          timeout?: number;
-          onConnectionUpdate?: () => void;
-        }) => Promise<boolean>;
-        isConnected: () => Promise<boolean>;
-        createActor: <T>(options: {
-          canisterId: string;
-          interfaceFactory: any;
-        }) => Promise<ActorSubclass<T>>;
-        requestBalance: () => Promise<
-          Array<{
-            amount: number;
-            currency: string;
-            image: string;
-            name: string;
-            value: number;
-          }>
-        >;
-        requestTransfer: (params: Wallet.TransferParams) => Promise<{ height: number }>;
-        requestTransferToken: (params: any) => Promise<any>;
-        requestBurnXTC: (params: { to: string; amount: number }) => Promise<any>;
-        batchTransactions: (transactions: Wallet.Transaction.Item[]) => Promise<any>;
-        disconnect: () => Promise<void>;
-        principalId?: string;
-        accountId?: string;
-        // Other properties or methods if needed
-      };
-    };
-  }
-}
 
 export class PlugAdapter implements Adapter.Interface {
   name: string = "Plug";
