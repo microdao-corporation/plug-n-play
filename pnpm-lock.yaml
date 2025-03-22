@@ -22,16 +22,16 @@ importers:
         version: 2.3.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
       '@dfinity/ledger-icp':
         specifier: 2.6.9
-        version: 2.6.9(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)(@dfinity/utils@2.10.1(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))
+        version: 2.6.9(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)(@dfinity/utils@2.11.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))
       '@dfinity/nns':
         specifier: 8.3.0
-        version: 8.3.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/ledger-icp@2.6.9(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)(@dfinity/utils@2.10.1(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)))(@dfinity/principal@2.3.0)(@dfinity/utils@2.10.1(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))
+        version: 8.3.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/ledger-icp@2.6.9(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)(@dfinity/utils@2.11.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)))(@dfinity/principal@2.3.0)(@dfinity/utils@2.11.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))
       '@dfinity/principal':
         specifier: ^2.3.0
         version: 2.3.0
       '@dfinity/utils':
-        specifier: 2.10.1
-        version: 2.10.1(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
+        specifier: 2.11.0
+        version: 2.11.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
       '@slide-computer/signer':
         specifier: 3.16.0
         version: 3.16.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/identity@2.3.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
@@ -206,8 +206,8 @@ packages:
   '@dfinity/principal@2.3.0':
     resolution: {integrity: sha512-rb3TsxR3L/Vq2GWV/GGIMXPbzDDqxNohPbNW8nJKhpcm8Ds00tCVEmPUDqrn735xJW0Pmzog/6/S1L9jG2UT9g==}
 
-  '@dfinity/utils@2.10.1':
-    resolution: {integrity: sha512-ycsaWrmv02Moh2hTRJzqNzPPi88qDj3koUiaqKSUbcSwmPM/xQ73VPNz/tSj3pxCynmBgwUzyPHr5Cb5muBZrw==}
+  '@dfinity/utils@2.11.0':
+    resolution: {integrity: sha512-meQSoCO/r0oEndAQ0LtWUnDXUHbju9K8UP18tDTMaoEMcMus5qQgZqxeKm7zs5XIpCiymqKSketJKvlhdkdsYQ==}
     peerDependencies:
       '@dfinity/agent': ^2.0.0
       '@dfinity/candid': ^2.0.0
@@ -2842,20 +2842,20 @@ snapshots:
       '@noble/hashes': 1.7.1
       borc: 2.1.2
 
-  '@dfinity/ledger-icp@2.6.9(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)(@dfinity/utils@2.10.1(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))':
+  '@dfinity/ledger-icp@2.6.9(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)(@dfinity/utils@2.11.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))':
     dependencies:
       '@dfinity/agent': 2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
       '@dfinity/candid': 2.3.0(@dfinity/principal@2.3.0)
       '@dfinity/principal': 2.3.0
-      '@dfinity/utils': 2.10.1(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
+      '@dfinity/utils': 2.11.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
 
-  '@dfinity/nns@8.3.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/ledger-icp@2.6.9(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)(@dfinity/utils@2.10.1(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)))(@dfinity/principal@2.3.0)(@dfinity/utils@2.10.1(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))':
+  '@dfinity/nns@8.3.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/ledger-icp@2.6.9(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)(@dfinity/utils@2.11.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)))(@dfinity/principal@2.3.0)(@dfinity/utils@2.11.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))':
     dependencies:
       '@dfinity/agent': 2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
       '@dfinity/candid': 2.3.0(@dfinity/principal@2.3.0)
-      '@dfinity/ledger-icp': 2.6.9(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)(@dfinity/utils@2.10.1(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))
+      '@dfinity/ledger-icp': 2.6.9(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)(@dfinity/utils@2.11.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))
       '@dfinity/principal': 2.3.0
-      '@dfinity/utils': 2.10.1(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
+      '@dfinity/utils': 2.11.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
       '@noble/hashes': 1.7.1
       randombytes: 2.1.0
 
@@ -2863,7 +2863,7 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.7.1
 
-  '@dfinity/utils@2.10.1(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)':
+  '@dfinity/utils@2.11.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)':
     dependencies:
       '@dfinity/agent': 2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
       '@dfinity/candid': 2.3.0(@dfinity/principal@2.3.0)
