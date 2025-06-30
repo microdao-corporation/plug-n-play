@@ -43,7 +43,7 @@
     "@slide-computer/signer-extension": "3.16.0",
     "@slide-computer/signer-transport-stoic": "3.16.0",
     "@slide-computer/signer-web": "3.16.0",
-    "js-sha256": "0.11.0"
+    "js-sha256": "0.11.1"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
