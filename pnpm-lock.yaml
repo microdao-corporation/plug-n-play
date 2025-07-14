@@ -91,8 +91,8 @@ importers:
         specifier: ^4.3.0
         version: 4.5.3(@types/node@22.14.1)(rollup@4.40.0)(typescript@5.8.2)(vite@6.1.1(@types/node@22.14.1)(terser@5.39.0))
       vite-plugin-static-copy:
-        specifier: 2.2.0
-        version: 2.2.0(vite@6.1.1(@types/node@22.14.1)(terser@5.39.0))
+        specifier: 3.1.1
+        version: 3.1.1(vite@6.1.1(@types/node@22.14.1)(terser@5.39.0))
       vitest:
         specifier: 3.0.2
         version: 3.0.2(@types/node@22.14.1)(jsdom@26.0.0)(terser@5.39.0)
@@ -1247,6 +1247,14 @@ packages:
   fd-slicer@1.1.0:
     resolution: {integrity: sha512-cE1qsB/VwyQozZ+q1dGxR8LBYNZeofhEdUNGSMbQD3Gw2lAzX9Zb3uIU6Ebc/Fmyjo9AWWfnn0AUCHqtevs/8g==}
 
+  fdir@6.4.6:
+    resolution: {integrity: sha512-hiFoqpyZcfNm1yc4u8oWCf9A2c4D3QjCrks3zmoVKVxpQRzmPNar1hUJcBG2RQHvEVGDN+Jm81ZheVLAQMK6+w==}
+    peerDependencies:
+      picomatch: ^3 || ^4
+    peerDependenciesMeta:
+      picomatch:
+        optional: true
+
   file-type@12.4.2:
     resolution: {integrity: sha512-UssQP5ZgIOKelfsaB5CuGAL+Y+q7EmONuiwF3N5HAH0t27rvrttgi6Ra9k/+DVaY9UF6+ybxu5pOXLUdA8N7Vg==}
     engines: {node: '>=8'}
@@ -1961,6 +1969,10 @@ packages:
     resolution: {integrity: sha512-4k9LlvY6Bo/1FcIdV33wqZQES0Py+iKISU9Uc8p8AjWoZPnFKMpVIVD3s0EYn4jzLh1I+WeUZkJ0Yoa4Qfw3Kg==}
     engines: {node: '>=4'}
 
+  p-map@7.0.3:
+    resolution: {integrity: sha512-VkndIv2fIB99swvQoA65bm+fsmt6UNdGeIB0oxBs+WhAhdh08QA04JXpI7rbB9r08/nkbysKoya9rtDERYOYMA==}
+    engines: {node: '>=18'}
+
   p-pipe@3.1.0:
     resolution: {integrity: sha512-08pj8ATpzMR0Y80x50yJHn37NF6vjrqHutASaX5LiH5npS9XPvrUmscd9MF5R4fuYRHOxQR1FfMIlF7AzwoPqw==}
     engines: {node: '>=8'}
@@ -2461,6 +2473,10 @@ packages:
   tinyexec@0.3.2:
     resolution: {integrity: sha512-KQQR9yN7R5+OSwaK0XQoj22pwHoTlgYqmUscPYoknOoWCWfj/5/ABTMRi69FrKU5ffPVh5QcFikpWJI/P1ocHA==}
 
+  tinyglobby@0.2.14:
+    resolution: {integrity: sha512-tX5e7OM1HnYr2+a2C/4V0htOcSQcoSTH9KgJnVvNm5zm/cyEWKJ7j7YutsH9CxMdtOkkLFy2AHrMci9IM8IPZQ==}
+    engines: {node: '>=12.0.0'}
+
   tinypool@1.0.2:
     resolution: {integrity: sha512-al6n+QEANGFOMf/dmUMsuS5/r9B06uwlyNjZZql/zv8J7ybHCgoihBNORZCY2mzUuAnomQa2JdhyHKzZxPCrFA==}
     engines: {node: ^18.0.0 || >=20.0.0}
@@ -2603,11 +2619,11 @@ packages:
       vite:
         optional: true
 
-  vite-plugin-static-copy@2.2.0:
-    resolution: {integrity: sha512-ytMrKdR9iWEYHbUxs6x53m+MRl4SJsOSoMu1U1+Pfg0DjPeMlsRVx3RR5jvoonineDquIue83Oq69JvNsFSU5w==}
+  vite-plugin-static-copy@3.1.1:
+    resolution: {integrity: sha512-oR53SkL5cX4KT1t18E/xU50vJDo0N8oaHza4EMk0Fm+2/u6nQivxavOfrDk3udWj+dizRizB/QnBvJOOQrTTAQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
     peerDependencies:
-      vite: ^5.0.0 || ^6.0.0
+      vite: ^5.0.0 || ^6.0.0 || ^7.0.0
 
   vite@6.1.1:
     resolution: {integrity: sha512-4GgM54XrwRfrOp297aIYspIti66k56v16ZnqHvrIM7mG+HjDlAwS7p+Srr7J6fGvEdOJ5JcQ/D9T7HhtdXDTzA==}
@@ -4034,6 +4050,10 @@ snapshots:
     dependencies:
       pend: 1.2.0
 
+  fdir@6.4.6(picomatch@4.0.2):
+    optionalDependencies:
+      picomatch: 4.0.2
+
   file-type@12.4.2: {}
 
   file-type@3.9.0: {}
@@ -4803,6 +4823,8 @@ snapshots:
     dependencies:
       p-reduce: 1.0.0
 
+  p-map@7.0.3: {}
+
   p-pipe@3.1.0: {}
 
   p-reduce@1.0.0: {}
@@ -5330,6 +5352,11 @@ snapshots:
 
   tinyexec@0.3.2: {}
 
+  tinyglobby@0.2.14:
+    dependencies:
+      fdir: 6.4.6(picomatch@4.0.2)
+      picomatch: 4.0.2
+
   tinypool@1.0.2: {}
 
   tinyrainbow@2.0.0: {}
@@ -5510,12 +5537,13 @@ snapshots:
       - rollup
       - supports-color
 
-  vite-plugin-static-copy@2.2.0(vite@6.1.1(@types/node@22.14.1)(terser@5.39.0)):
+  vite-plugin-static-copy@3.1.1(vite@6.1.1(@types/node@22.14.1)(terser@5.39.0)):
     dependencies:
       chokidar: 3.6.0
-      fast-glob: 3.3.3
       fs-extra: 11.3.0
+      p-map: 7.0.3
       picocolors: 1.1.1
+      tinyglobby: 0.2.14
       vite: 6.1.1(@types/node@22.14.1)(terser@5.39.0)
 
   vite@6.1.1(@types/node@22.14.1)(terser@5.39.0):
