@@ -58,7 +58,7 @@
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-compress": "2.1.1",
     "vite-plugin-dts": "^4.3.0",
-    "vite-plugin-static-copy": "2.2.0",
+    "vite-plugin-static-copy": "2.3.2",
     "vitest": "3.0.2"
   },
   "engines": {
