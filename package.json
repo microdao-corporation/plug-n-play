@@ -86,7 +86,7 @@
     "@dfinity/candid": "^2.4.1",
     "@dfinity/identity": "^2.4.1",
     "@dfinity/ledger-icp": "4.1.0",
-    "@dfinity/principal": "2.4.1",
+    "@dfinity/principal": "3.2.4",
     "@dfinity/utils": "2.14.0",
     "@slide-computer/signer": "3.16.0",
     "@slide-computer/signer-agent": "3.16.0",
