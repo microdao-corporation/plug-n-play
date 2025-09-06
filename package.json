@@ -82,7 +82,7 @@
   "license": "MIT",
   "dependencies": {
     "@dfinity/agent": "^2.4.1",
-    "@dfinity/auth-client": "2.4.1",
+    "@dfinity/auth-client": "3.2.4",
     "@dfinity/candid": "^2.4.1",
     "@dfinity/identity": "^2.4.1",
     "@dfinity/ledger-icp": "4.1.0",
