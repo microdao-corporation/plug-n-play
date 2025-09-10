@@ -16,7 +16,7 @@
     "buffer": "^6.0.3",
     "process": "^0.11.10",
     "svelte": "5.28.2",
-    "vite": "6.3.5"
+    "vite": "6.3.6"
   },
   "dependencies": {
     "@dfinity/agent": "2.4.1",
