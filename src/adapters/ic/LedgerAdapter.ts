@@ -8,17 +8,17 @@ import { BaseAdapter, type AdapterConstructorArgs } from "../BaseAdapter";
 import { Adapter, type Wallet } from "../../types/index.d";
 import { LedgerAdapterConfig } from "../../types/AdapterConfigs";
 import type InternetComputerApp from "@zondax/ledger-icp";
-import type { Transport } from "@ledgerhq/hw-transport";
+import type Transport from "@ledgerhq/hw-transport";
 import { Buffer } from "buffer";
 import { getWalletModal, type RequestType } from "../../ui/WalletModal";
 
 // Import utilities
 import { LEDGER_DEFAULTS, LEDGER_RETURN_CODE } from "../../utils/ledger/constants";
 import { derToRaw } from "../../utils/ledger/crypto";
-import { fetchConsentMessage } from "../../utils/ledger/icrc21";
+import { fetchConsentMessageForLedger } from "../../utils/ledger/icrc21";
 import { loadTransport, loadLedgerApp } from "../../utils/ledger/modules";
 import type { LedgerRequest, LedgerCallRequest } from "../../utils/ledger/types";
-import { isCallRequest, isTransferRequest } from "../../utils/ledger/types";
+import { isCallRequest, isReadRequest, isTransferRequest } from "../../utils/ledger/types";
 
 /**
  * Default Ledger adapter settings
@@ -75,7 +75,7 @@ class LedgerIdentity implements Identity {
       } else {
         return 'call';
       }
-    } else if (request.request_type === 'read_state') {
+    } else if (isReadRequest(request)) {
       return 'read';
     }
     return 'generic';
@@ -86,7 +86,7 @@ class LedgerIdentity implements Identity {
    */
   private async signWithBls(
     request: LedgerCallRequest,
-    consentMessage: string | null
+    consentData: any | null
   ): Promise<Buffer> {
     // Encode the call request with content wrapper
     const callCbor = Cbor.encode({ content: request });
@@ -98,14 +98,15 @@ class LedgerIdentity implements Identity {
     const readStateMessage = Buffer.from(readStateCbor);
 
     // Prepare parameters for signBls (all must be non-empty hex strings)
-    const consentRequest = consentMessage
-      ? Buffer.from(consentMessage, 'utf-8').toString('hex')
+    // The consent data needs to be CBOR-encoded for Ledger
+    const consentRequest = consentData
+      ? Buffer.from(Cbor.encode(consentData)).toString('hex')
       : '00'; // Single zero byte when no consent message
     const canisterCall = callMessage.toString('hex');
     const certificate = readStateMessage.toString('hex');
 
     console.log('[LedgerIdentity] SignBls parameters:', {
-      hasConsentMessage: !!consentMessage,
+      hasConsentData: !!consentData,
       consentLength: consentRequest.length,
       callLength: canisterCall.length,
       certificateLength: certificate.length
@@ -135,10 +136,12 @@ class LedgerIdentity implements Identity {
    * Sign a request using regular sign method
    */
   private async signRegular(request: LedgerRequest): Promise<Buffer> {
+    // Encode the request with content wrapper
     const cborRequest = Cbor.encode({ content: request });
     const message = Buffer.from(cborRequest);
 
     console.log('[LedgerIdentity] Signing CBOR request, length:', message.length);
+    console.log('[LedgerIdentity] First 20 bytes:', message.subarray(0, 20).toString('hex'));
 
     const signResponse = await this.app.sign(this.derivationPath, message, 0x00);
 
@@ -188,17 +191,17 @@ class LedgerIdentity implements Identity {
         // For non-transfer calls, use signBls with ICRC-21 support
         console.log('[LedgerIdentity] Using signBls for non-transfer call');
 
-        // Attempt to fetch ICRC-21 consent message
-        let consentMessage: string | null = null;
+        // Attempt to fetch ICRC-21 consent data for Ledger
+        let consentData: any | null = null;
         if (request.canister_id && request.method_name && request.arg) {
-          consentMessage = await fetchConsentMessage(
+          consentData = await fetchConsentMessageForLedger(
             request.canister_id.toString(),
             request.method_name,
             request.arg
           );
         }
 
-        rawSignature = await this.signWithBls(request, consentMessage);
+        rawSignature = await this.signWithBls(request, consentData);
       } else {
         // For transfers and read state requests, use regular sign
         console.log('[LedgerIdentity] Using regular sign for', request.request_type);
@@ -477,6 +480,7 @@ export class LedgerAdapter extends BaseAdapter<LedgerAdapterConfig> {
 
   /**
    * Show address on Ledger device for verification
+   * Public API method documented in demo
    */
   async showAddressOnDevice(): Promise<void> {
     if (!this.app) {
@@ -488,42 +492,5 @@ export class LedgerAdapter extends BaseAdapter<LedgerAdapterConfig> {
     if (response.returnCode !== LEDGER_RETURN_CODE.SUCCESS) {
       throw new Error(`Failed to show address on device: ${response.errorMessage}`);
     }
-  }
-
-  /**
-   * Sign a message for ICP transactions that require special handling
-   * @param message - The message to sign
-   * @param txType - The transaction type (0x00 for default, 0x01 for stake)
-   */
-  async signTransaction(message: Buffer, txType: number = 0x00): Promise<Buffer> {
-    if (!this.app) {
-      throw new Error("Not connected to Ledger device");
-    }
-
-    const response = await this.app.sign(this.derivationPath, message, txType);
-
-    if (response.returnCode !== LEDGER_RETURN_CODE.SUCCESS) {
-      throw new Error(`Signing failed: ${response.errorMessage}`);
-    }
-
-    if (!response.signatureDER) {
-      throw new Error("No signature returned from device");
-    }
-
-    return response.signatureDER;
-  }
-
-  /**
-   * Get the current transport type being used
-   */
-  getTransportType(): string {
-    return this.config.transport || 'WebHID';
-  }
-
-  /**
-   * Get the derivation path being used
-   */
-  getDerivationPath(): string {
-    return this.derivationPath;
   }
 }

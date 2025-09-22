@@ -4,7 +4,7 @@
  */
 
 import type InternetComputerApp from "@zondax/ledger-icp";
-import type { Transport } from "@ledgerhq/hw-transport";
+import type Transport from "@ledgerhq/hw-transport";
 
 // Cache for loaded modules
 const moduleCache: Record<string, any> = {};

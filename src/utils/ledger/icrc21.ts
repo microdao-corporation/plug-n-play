@@ -215,6 +215,68 @@ async function generateFallbackMessage(method: string, arg: ArrayBuffer): Promis
 }
 
 /**
+ * Fetch ICRC-21 consent message for Ledger hardware wallet
+ * Returns the raw consent info object for proper CBOR encoding
+ * @param canisterId - The canister ID to fetch consent from
+ * @param method - The method name being called
+ * @param arg - The candid-encoded argument
+ * @returns The consent info object or null if not available
+ */
+export async function fetchConsentMessageForLedger(
+  canisterId: string,
+  method: string,
+  arg: ArrayBuffer
+): Promise<any | null> {
+  try {
+    console.log('[ICRC-21] Attempting to fetch consent message for Ledger for', method);
+
+    // Create an anonymous agent for fetching consent messages
+    const agent = new HttpAgent({
+      host: "https://icp0.io" // Will use default IC gateway
+    });
+
+    // Create actor for the target canister
+    const actor = Actor.createActor(createICRC21IDL, {
+      agent,
+      canisterId,
+    });
+
+    // Prepare the request with FieldsDisplay for Ledger
+    const request = {
+      method,
+      arg: Array.from(new Uint8Array(arg)),
+      user_preferences: {
+        metadata: {
+          language: "en",
+          utc_offset_minutes: [],
+        },
+        device_spec: [{ FieldsDisplay: null }],
+      },
+    };
+
+    // Call the consent message method
+    const response: any = await actor.icrc21_canister_call_consent_message(request);
+
+    if (response.Ok) {
+      const consentInfo = response.Ok;
+      console.log('[ICRC-21] Successfully fetched consent info for Ledger:', consentInfo);
+
+      // Extract just the consent_message part for Ledger
+      // The Ledger expects the consent message data, not the full info object
+      if (consentInfo.consent_message) {
+        return consentInfo.consent_message;
+      }
+    }
+
+    return null;
+
+  } catch (error) {
+    console.log('[ICRC-21] Failed to fetch consent message for Ledger:', error);
+    return null;
+  }
+}
+
+/**
  * Fetch ICRC-21 consent message for a canister call
  * @param canisterId - The canister ID to fetch consent from
  * @param method - The method name being called
@@ -232,7 +294,7 @@ export async function fetchConsentMessage(
     // Create an anonymous agent for fetching consent messages
     // ICRC-21 spec requires that consent messages be available without authentication
     const agent = new HttpAgent({
-      host: undefined // Will use default IC gateway
+      host: "https://icp0.io" // Will use default IC gateway
     });
 
     // Note: fetchRootKey is only needed for local development
@@ -253,7 +315,7 @@ export async function fetchConsentMessage(
           language: "en",
           utc_offset_minutes: [],
         },
-        device_spec: [{ GenericDisplay: null }],
+        device_spec: [{ FieldsDisplay: null }],
       },
     };
 
