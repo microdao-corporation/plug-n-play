@@ -103,7 +103,7 @@
     "docdash": "^2.0.2",
     "jsdoc": "^4.0.4",
     "jsdom": "26.1.0",
-    "terser": "5.43.1",
+    "terser": "5.44.0",
     "typedoc": "^0.28.10",
     "vite": "7.1.2",
     "vite-plugin-compression": "^0.5.1",
