@@ -1,5 +1,5 @@
 import { Adapter } from "../types";
-import { IIAdapter } from "./ic";
+import { IIAdapter, LedgerAdapter } from "./ic";
 import { UnifiedSignerAdapter, SignerType } from "./ic/UnifiedSignerAdapter";
 import { getDefaultTransportConfig } from "../utils";
 
@@ -9,6 +9,7 @@ import nfidLogo from "../../assets/nfid.png";
 import dfinityLogo from "../../assets/dfinity.webp";
 import plugLogo from "../../assets/plug.webp";
 import stoicLogo from "../../assets/stoic.jpg";
+import ledgerLogo from "../../assets/ledger.svg";
 
 // Define IC-only adapters using unified signer adapter
 export const Adapters: Record<string, Adapter.Config> = {
@@ -102,10 +103,24 @@ export const Adapters: Record<string, Adapter.Config> = {
       ...getDefaultTransportConfig(),
     },
   },
+  ledger: {
+    id: 'ledger',
+    enabled: true,
+    walletName: "Ledger",
+    logo: ledgerLogo,
+    website: "https://www.ledger.com",
+    chain: 'ICP',
+    adapter: LedgerAdapter,
+    config: {
+      derivePath: "m/44'/223'/0'/0/0",
+      enableICRC21: false,
+      transport: 'WebHID',
+    },
+  },
 };
 
 // Export adapters for direct use
-export { IIAdapter, UnifiedSignerAdapter };
+export { IIAdapter, UnifiedSignerAdapter, LedgerAdapter };
 
 // Export base classes for extensibility
 export { BaseAdapter } from "./BaseAdapter";

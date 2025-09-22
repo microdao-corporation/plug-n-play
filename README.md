@@ -53,7 +53,7 @@ await actor.someMethod();
 ### Complete Example
 
 ```typescript
-import { createPNP, ConfigBuilder } from "@windoge98/plug-n-play";
+import { createPNP } from "@windoge98/plug-n-play";
 import { MetaMaskExtension } from "@windoge98/pnp-metamask";
 import { PhantomExtension } from "@windoge98/pnp-phantom";
 
@@ -86,14 +86,15 @@ const pnp = createPNP({
   }
 });
 
-// Option 2: Builder pattern
-const pnp2 = createPNP(
-  ConfigBuilder.create()
-    .withEnvironment('local', { replica: 8080 })
-    .withSecurity(true, false)
-    .withAdapter('ii', { enabled: true })
-    .build()
-);
+// Option 2: Minimal configuration
+const pnp2 = createPNP({
+  network: 'local',
+  ports: { replica: 8080 },
+  security: { fetchRootKey: true, verifyQuerySignatures: false },
+  adapters: {
+    ii: { enabled: true }
+  }
+});
 
 ```
 
@@ -137,15 +138,18 @@ const pnp = createPNP({
   }
 });
 
-// Or with builder pattern
-const pnp2 = ConfigBuilder.create()
-  .withExtensions(MetaMaskExtension, PhantomExtension)
-  .withProviders({ 
+// Or with combined configuration
+const pnp2 = createPNP({
+  extensions: [MetaMaskExtension, PhantomExtension],
+  providers: {
     siws: 'YOUR_SIWS_CANISTER_ID',
     siwe: 'YOUR_SIWE_CANISTER_ID'
-  })
-  .withAdapter('metamask', { enabled: true })
-  .build();
+  },
+  adapters: {
+    metamask: { enabled: true },
+    phantom: { enabled: true }
+  }
+});
 ```
 
 ### Creating Custom Extensions

@@ -411,7 +411,7 @@ export class PNP implements PnpInterface {
 
 /**
  * Factory function to create a new PNP instance with configuration.
- * @param {CreatePnpArgs} [config={}] - Configuration object or ConfigBuilder
+ * @param {CreatePnpArgs} [config={}] - Configuration object
  * @returns {PNP} New PNP instance
  * @example
  * ```typescript
@@ -423,14 +423,6 @@ export class PNP implements PnpInterface {
  *     plug: { enabled: true }
  *   }
  * });
- * 
- * // Using ConfigBuilder
- * const pnp2 = createPNP(
- *   ConfigBuilder.create()
- *     .withEnvironment('local')
- *     .withAdapter('ii', { enabled: true })
- *     .build()
- * );
  * ```
  */
 export const createPNP = (config: CreatePnpArgs = {}) => {
@@ -438,8 +430,7 @@ export const createPNP = (config: CreatePnpArgs = {}) => {
   return new PNP(globalConfig);
 };
 
-// Export configuration types and builder
-export { ConfigBuilder } from "./config";
+// Export configuration types
 export type { CreatePnpArgs };
 
 // Export adapter extension types

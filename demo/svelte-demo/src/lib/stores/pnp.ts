@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 // Import from source for development
-import { PNP, ConfigBuilder } from '../../../../../src';
+import { PNP, createPNPConfig } from '../../../../../src';
 // Import wallet extensions from packages
 import { PhantomExtension } from '../../../../../packages/phantom/src';
 import { SolflareExtension } from '../../../../../packages/solflare/src';
@@ -19,47 +19,56 @@ export const availableWallets = derived(pnpInstance, $p => $p?.getEnabledWallets
 
 // Initialize PNP
 const initPNP = () => {
-    const pnp = new PNP(
-        ConfigBuilder.create()
-            .withEnvironment('ic')
-            .withDelegation({
-                timeout: BigInt(24 * 60 * 60 * 1000 * 1000 * 1000),
-                targets: []
-            })
-            .withProviders({
-                siws: 'guktk-fqaaa-aaaao-a4goa-cai',
-                siwe: 'r4zqx-aiaaa-aaaar-qbuia-cai',
-            })
-            .withExtensions(PhantomExtension, SolflareExtension, WalletConnectExtension, MetaMaskExtension, RabbyExtension)
-            .withIcAdapters()
-            // Configure Plug wallet with account selection enabled (default)
-            .withAdapter('plug', { 
+    const config = createPNPConfig({
+        network: 'ic',
+        delegation: {
+            timeout: BigInt(24 * 60 * 60 * 1000 * 1000 * 1000),
+            targets: []
+        },
+        providers: {
+            siws: 'guktk-fqaaa-aaaao-a4goa-cai',
+            siwe: 'r4zqx-aiaaa-aaaar-qbuia-cai',
+        },
+        extensions: [PhantomExtension, SolflareExtension, WalletConnectExtension, MetaMaskExtension, RabbyExtension],
+        adapters: {
+            // IC adapters
+            ii: { enabled: true },
+            plug: {
                 enabled: true,
-                // disableAccountSelection: false  // Uncomment to disable account selection UI
-            })
+            },
+            oisy: { enabled: true },
+            nfid: { enabled: true },
+            stoic: { enabled: true },
+            ledger: {
+                enabled: true,
+                derivePath: "m/44'/223'/0'/0/0",
+                enableICRC21: true
+            },
             // Solana wallets
-            .withAdapter('phantom', { enabled: true })
-            .withAdapter('solflare', { enabled: true })
-            .withAdapter('walletconnect', {
+            phantom: { enabled: true },
+            solflare: { enabled: true },
+            walletconnect: {
                 enabled: true,
                 projectId: 'YOUR_PROJECT_ID',
                 appName: 'PNP Demo',
                 appDescription: 'Demo using WalletConnect',
                 appUrl: 'https://example.com',
                 appIcons: ['https://example.com/icon.png']
-            })
+            },
             // Ethereum wallets
-            .withAdapter('metamask', { enabled: true })
-            .withAdapter('rabby', { enabled: true })
-            .build()
-    );
+            metamask: { enabled: true },
+            rabby: { enabled: true }
+        }
+    });
+
+    const pnp = new PNP(config);
 
     pnpInstance.set(pnp);
     
-    // Auto-reconnect IC wallets (not Solana/Ethereum wallets)
+    // Auto-reconnect IC wallets (not Solana/Ethereum/Hardware wallets)
     const stored = localStorage.getItem('pnpConnectedWallet');
-    const nonIcWallets = ['phantom', 'solflare', 'walletconnect', 'metamask', 'rabby'];
-    if (stored && !nonIcWallets.includes(stored)) {
+    const nonAutoReconnectWallets = ['phantom', 'solflare', 'walletconnect', 'metamask', 'rabby', 'ledger'];
+    if (stored && !nonAutoReconnectWallets.includes(stored)) {
         pnp.connect(stored).then(account => {
             if (account) {
                 isConnected.set(true);
@@ -90,13 +99,28 @@ export const connectWallet = async (walletId: string) => {
     try {
         const account = await pnp.connect(walletId);
         if (!account) throw new Error("Connection cancelled");
-        
+
+        console.log('Connected successfully:', account);
+
+        // Update all stores
+        console.log('Setting isConnected to true');
         isConnected.set(true);
+        console.log('Setting principalId to:', account.owner);
         principalId.set(account.owner);
         connectingWalletId.set(null);
+
+        // Debug: Check if stores actually updated
+        console.log('Store values after update:', {
+            isConnected: get(isConnected),
+            principalId: get(principalId)
+        });
+
+        // Store the account on the PNP instance for later access
+        (pnp as any).connectedAccount = account;
+
         lastEvent.set({ type: 'connected', walletId, principal: account.owner });
         localStorage.setItem('pnpConnectedWallet', walletId);
-        
+
         return account;
     } catch (err) {
         resetState();

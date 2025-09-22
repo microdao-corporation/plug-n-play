@@ -2,7 +2,9 @@
   import SignIn from './lib/components/SignIn.svelte';
 </script>
 
-<SignIn />
+<main>
+  <SignIn />
+</main>
 
 <style>
   :global(body) {

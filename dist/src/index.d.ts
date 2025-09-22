@@ -256,7 +256,7 @@ export declare class PNP implements PnpInterface {
 }
 /**
  * Factory function to create a new PNP instance with configuration.
- * @param {CreatePnpArgs} [config={}] - Configuration object or ConfigBuilder
+ * @param {CreatePnpArgs} [config={}] - Configuration object
  * @returns {PNP} New PNP instance
  * @example
  * ```typescript
@@ -268,18 +268,9 @@ export declare class PNP implements PnpInterface {
  *     plug: { enabled: true }
  *   }
  * });
- *
- * // Using ConfigBuilder
- * const pnp2 = createPNP(
- *   ConfigBuilder.create()
- *     .withEnvironment('local')
- *     .withAdapter('ii', { enabled: true })
- *     .build()
- * );
  * ```
  */
 export declare const createPNP: (config?: CreatePnpArgs) => PNP;
-export { ConfigBuilder } from './config';
 export type { CreatePnpArgs };
 export { createAdapterExtension, type AdapterExtension, type ExtractAdapterIds } from './types/AdapterExtensions';
 export { BaseAdapter } from './adapters/BaseAdapter';

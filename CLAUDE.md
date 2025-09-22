@@ -162,8 +162,8 @@ const pnp = createPNP({
 
 3. **Configuration System** (`src/config.ts`)
    - `createPNPConfig()`: Factory with environment detection
-   - ConfigBuilder pattern for fluent API
    - Extension registration and adapter configuration
+   - Object-based configuration with type safety
 
 4. **Adapter Base Classes** (`src/adapters/`)
    - **BaseAdapter**: Common functionality
@@ -197,14 +197,14 @@ const pnp = createPNP({
   }
 });
 
-// Builder pattern alternative
-const pnp2 = createPNP(
-  ConfigBuilder.create()
-    .withEnvironment('local')
-    .withExtensions(SolanaExtension)
-    .withAdapter('ii', { enabled: true })
-    .build()
-);
+// Minimal configuration example
+const pnp2 = createPNP({
+  network: 'local',
+  extensions: [SolanaExtension],
+  adapters: {
+    ii: { enabled: true }
+  }
+});
 ```
 
 ### Key Types

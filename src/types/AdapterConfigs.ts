@@ -78,15 +78,23 @@ export interface SiweAdapterConfig extends GlobalPnpConfig {
   derivationOrigin?: string;
 }
 
+export interface LedgerAdapterConfig extends GlobalPnpConfig {
+  derivePath?: string; // Default: "m/44'/223'/0'/0/0"
+  appVersion?: string; // Minimum required app version
+  enableICRC21?: boolean; // Enable ICRC-21 consent message support
+  transport?: 'WebHID' | 'WebUSB'; // Transport type (default: WebHID)
+}
+
 // Union type for all adapter configs
-export type AdapterSpecificConfig = 
-  | IIAdapterConfig 
-  | PlugAdapterConfig 
-  | NFIDAdapterConfig 
-  | OisyAdapterConfig 
+export type AdapterSpecificConfig =
+  | IIAdapterConfig
+  | PlugAdapterConfig
+  | NFIDAdapterConfig
+  | OisyAdapterConfig
   | SiwsAdapterConfig
   | SiweAdapterConfig
-  | StoicAdapterConfig;
+  | StoicAdapterConfig
+  | LedgerAdapterConfig;
 
 // Generic type guard factory
 function createTypeGuard<T extends GlobalPnpConfig>(
@@ -111,4 +119,5 @@ export const isIIAdapterConfig = createTypeGuard<IIAdapterConfig>(
   'hostUrl'
 );
 export const isSiweAdapterConfig = createTypeGuard<SiweAdapterConfig>('siweProviderCanisterId');
-export const isStoicAdapterConfig = createTypeGuard<StoicAdapterConfig>('keyType'); 
+export const isStoicAdapterConfig = createTypeGuard<StoicAdapterConfig>('keyType');
+export const isLedgerAdapterConfig = createTypeGuard<LedgerAdapterConfig>('derivePath', 'enableICRC21', 'transport'); 

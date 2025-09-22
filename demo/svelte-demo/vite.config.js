@@ -3,14 +3,21 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 import path from 'path'
 import inject from '@rollup/plugin-inject'
 
+const bufferPolyfillPath = path.resolve(
+  __dirname,
+  'node_modules/vite-plugin-node-polyfills/shims/buffer/dist/index.js'
+);
+
+const processPolyfillPath = path.resolve(
+  __dirname,
+  'node_modules/process/browser.js'
+);
+
 export default defineConfig({
   plugins: [
     svelte({
       compilerOptions: {
         dev: true,
-        compatibility: {
-          componentApi: 4
-        },
         hmr: true
       }
     }),
@@ -24,8 +31,8 @@ export default defineConfig({
     alias: {
       '@pnp': path.resolve(__dirname, '../../src'),
       // Make sure buffer polyfill is available
-      'buffer': 'buffer',
-      'process': 'process/browser',
+      buffer: bufferPolyfillPath,
+      process: processPolyfillPath,
     },
   },
   define: {
@@ -56,7 +63,7 @@ export default defineConfig({
     }
   },
   server: {
-    port: 3000,
+    port: 5173,
     open: true
   }
 })

@@ -1,0 +1,144 @@
+type BatchCommentCountRequest = record { context_ids : vec text };
+type Comment = record {
+  id : nat64;
+  context_id : text;
+  content : text;
+  created_at : nat64;
+  edited_at : opt nat64;
+  author : principal;
+  likes : nat32;
+  parent_id : opt nat64;
+  is_edited : bool;
+};
+type CommentResponse = record {
+  id : nat64;
+  context_id : text;
+  content : text;
+  created_at : nat64;
+  edited_at : opt nat64;
+  author : principal;
+  likes : nat32;
+  has_liked : bool;
+  parent_id : opt nat64;
+  is_edited : bool;
+};
+type CommentsPage = record {
+  next_cursor : opt nat64;
+  comments : vec CommentResponse;
+};
+type ConsentInfo = record {
+  metadata : ConsentMessageMetadata;
+  consent_message : ConsentMessage;
+};
+type ConsentMessage = variant {
+  FieldsDisplayMessage : FieldsDisplay;
+  GenericDisplayMessage : text;
+};
+type ConsentMessageMetadata = record {
+  utc_offset_minutes : opt int16;
+  language : text;
+};
+type ConsentMessageRequest = record {
+  arg : blob;
+  method : text;
+  user_preferences : ConsentMessageSpec;
+};
+type ConsentMessageSpec = record {
+  metadata : ConsentMessageMetadata;
+  device_spec : opt DisplayMessageType;
+};
+type ContextCommentCount = record { context_id : text; count : nat32 };
+type CreateCommentRequest = record {
+  context_id : text;
+  content : text;
+  parent_id : opt nat64;
+};
+type Delegation = record {
+  created : nat64;
+  targets_list_hash : blob;
+  target : principal;
+  expiration : opt nat64;
+};
+type DelegationError = variant {
+  NotFound;
+  Unauthorized;
+  InvalidRequest : text;
+  StorageError : text;
+  Expired;
+};
+type DelegationRequest = record {
+  targets : vec principal;
+  expiration : opt nat64;
+};
+type DelegationResponse = record { delegations : vec Delegation };
+type DisplayMessageType = variant { GenericDisplay; FieldsDisplay };
+type EditCommentRequest = record { content : text; comment_id : nat64 };
+type ErrorInfo = record { description : text };
+type FieldsDisplay = record {
+  fields : vec record { text; Value };
+  intent : text;
+};
+type GetCommentsRequest = record {
+  context_id : text;
+  pagination : opt PaginationParams;
+  check_likes_for : opt principal;
+};
+type Icrc28TrustedOriginsResponse = record { trusted_origins : vec text };
+type PaginationParams = record { cursor : opt nat64; limit : opt nat64 };
+type Result = variant { Ok; Err : text };
+type Result_1 = variant { Ok : CommentResponse; Err : text };
+type Result_2 = variant { Ok : nat32; Err : text };
+type Result_3 = variant { Ok : ConsentInfo; Err : ErrorInfo };
+type Result_4 = variant { Ok : DelegationResponse; Err : DelegationError };
+type Result_5 = variant { Ok; Err : DelegationError };
+type RevokeDelegationRequest = record { targets : vec principal };
+type SupportedStandard = record { url : text; name : text };
+type Value = variant {
+  Text : record { content : text };
+  TokenAmount : record { decimals : nat8; amount : nat64; symbol : text };
+  TimestampSeconds : record { amount : nat64 };
+  DurationSeconds : record { amount : nat64 };
+};
+service : () -> {
+  // Allows admins to add new admins
+  add_admin : (text) -> (Result);
+  // Allows admins to ban a user for a specified number of days
+  ban_user : (principal, nat64) -> (Result);
+  // Check if a user is banned and return the remaining ban time in seconds
+  check_ban_status : (principal) -> (opt nat64) query;
+  create_comment : (CreateCommentRequest) -> (Result_1);
+  // Allows admins to delete any comment
+  delete_comment : (nat64) -> (Result);
+  // Allows admins to bulk delete comments for a specific context
+  delete_context_comments : (text) -> (Result_2);
+  edit_comment : (EditCommentRequest) -> (Result_1);
+  get_batch_context_comment_counts : (BatchCommentCountRequest) -> (
+      vec ContextCommentCount,
+    ) query;
+  get_comment : (nat64) -> (opt Comment) query;
+  get_comments_by_context : (GetCommentsRequest) -> (CommentsPage) query;
+  get_context_comment_count : (text) -> (nat32) query;
+  get_user_comments : (principal, opt nat32) -> (vec Comment) query;
+  get_user_liked_comments : () -> (vec nat64) query;
+  // Returns the list of supported standards including ICRC-21
+  // This is required by ICRC-21 specification for Ledger support
+  icrc10_supported_standards : () -> (vec SupportedStandard) query;
+  // Generates a consent message for ICRC-21 canister calls
+  // This follows the specification from https://github.com/dfinity/wg-identity-authentication/blob/main/topics/ICRC-21/icrc_21_consent_msg.md
+  icrc21_canister_call_consent_message : (ConsentMessageRequest) -> (
+      Result_3,
+    ) query;
+  icrc28_trusted_origins : () -> (Icrc28TrustedOriginsResponse) query;
+  // Creates a new delegation for the specified targets
+  icrc_34_delegate : (DelegationRequest) -> (Result_4);
+  // Returns current delegations for the caller that match the requested targets
+  icrc_34_get_delegation : (DelegationRequest) -> (Result_4) query;
+  // Revokes delegations for the specified targets
+  icrc_34_revoke_delegation : (RevokeDelegationRequest) -> (Result_5);
+  // Check if a specific principal is an admin
+  is_admin : (text) -> (bool) query;
+  like_comment : (nat64) -> (Result_2);
+  // Allows admins to unban a user
+  unban_user : (principal) -> (Result);
+  unlike_comment : (nat64) -> (Result_2);
+}

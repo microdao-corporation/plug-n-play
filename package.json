@@ -1,6 +1,6 @@
 {
   "name": "@windoge98/plug-n-play",
-  "version": "0.1.0-beta.20",
+  "version": "0.1.0-beta.22",
   "description": "Wallet wrapper/adapter for easy authentication on the Internet Computer",
   "module": "dist/plug-n-play.es.js",
   "main": "dist/index.js",
@@ -85,16 +85,20 @@
     "@dfinity/auth-client": "2.4.1",
     "@dfinity/candid": "^2.4.1",
     "@dfinity/identity": "^2.4.1",
+    "@dfinity/identity-secp256k1": "^2.4.1",
     "@dfinity/ledger-icp": "4.1.0",
     "@dfinity/principal": "2.4.1",
     "@dfinity/utils": "2.14.0",
+    "@ledgerhq/hw-transport-webhid": "^6.29.5",
+    "@ledgerhq/hw-transport-webusb": "^6.29.10",
     "@slide-computer/signer": "3.16.0",
     "@slide-computer/signer-agent": "3.16.0",
     "@slide-computer/signer-extension": "^3.16.0",
     "@slide-computer/signer-storage": "3.16.0",
     "@slide-computer/signer-transport-auth-client": "^3.16.0",
     "@slide-computer/signer-transport-stoic": "^3.16.0",
-    "@slide-computer/signer-web": "^3.16.0"
+    "@slide-computer/signer-web": "^3.16.0",
+    "@zondax/ledger-icp": "^3.2.8"
   },
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
