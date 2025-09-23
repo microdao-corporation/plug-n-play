@@ -2,8 +2,30 @@
  * ICRC-21 Consent Message Support for Ledger
  */
 
-import { HttpAgent, Actor } from "@dfinity/agent";
+import { HttpAgent, Actor, AnonymousIdentity, Cbor } from "@dfinity/agent";
 import { IDL } from "@dfinity/candid";
+import { Principal } from "@dfinity/principal";
+
+// Reuse agent instance for better performance
+let cachedAgent: HttpAgent | null = null;
+
+// Cache for consent responses to avoid repeated network calls
+interface ConsentCacheEntry {
+  consentRequest: string;
+  certificate: string;
+  timestamp: number;
+}
+
+const consentCache = new Map<string, ConsentCacheEntry>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL
+
+/**
+ * Generate cache key for consent request
+ */
+function generateCacheKey(canisterId: string, method: string, arg: ArrayBuffer): string {
+  const argHash = Array.from(new Uint8Array(arg)).slice(0, 32).join(''); // Use first 32 bytes as hash
+  return `${canisterId}:${method}:${argHash}`;
+}
 
 // ICRC-21 IDL type definitions
 const createICRC21IDL = () => {
@@ -92,6 +114,23 @@ const createICRC21IDL = () => {
     ),
   });
 };
+
+// Export the request type for use in encoding
+const icrc21IDL = createICRC21IDL();
+const icrc21_consent_message_request = IDL.Record({
+  method: IDL.Text,
+  arg: IDL.Vec(IDL.Nat8),
+  user_preferences: IDL.Record({
+    metadata: IDL.Record({
+      language: IDL.Text,
+      utc_offset_minutes: IDL.Opt(IDL.Int16),
+    }),
+    device_spec: IDL.Opt(IDL.Variant({
+      GenericDisplay: IDL.Null,
+      FieldsDisplay: IDL.Null,
+    })),
+  }),
+});
 
 /**
  * Format a field value from ICRC-21 response
@@ -215,36 +254,61 @@ async function generateFallbackMessage(method: string, arg: ArrayBuffer): Promis
 }
 
 /**
+ * Prepare CBOR for Ledger (matches hardware-wallet-cli pattern)
+ */
+function _prepareCborForLedger(request: any): ArrayBuffer {
+  return Cbor.encode({ content: request });
+}
+
+/**
  * Fetch ICRC-21 consent message for Ledger hardware wallet
- * Returns the raw consent info object for proper CBOR encoding
+ * Returns the consent request and certificate for proper signBls usage
  * @param canisterId - The canister ID to fetch consent from
  * @param method - The method name being called
  * @param arg - The candid-encoded argument
- * @returns The consent info object or null if not available
+ * @returns Object with consentRequest and certificate, or null if not available
  */
 export async function fetchConsentMessageForLedger(
   canisterId: string,
   method: string,
   arg: ArrayBuffer
-): Promise<any | null> {
+): Promise<{ consentRequest: string; certificate: string } | null> {
   try {
     console.log('[ICRC-21] Attempting to fetch consent message for Ledger for', method);
+    const startTime = performance.now();
 
-    // Create an anonymous agent for fetching consent messages
-    const agent = new HttpAgent({
-      host: "https://icp0.io" // Will use default IC gateway
-    });
+    // Check cache first
+    const cacheKey = generateCacheKey(canisterId, method, arg);
+    const cachedEntry = consentCache.get(cacheKey);
+    
+    if (cachedEntry && (Date.now() - cachedEntry.timestamp) < CACHE_TTL) {
+      console.log('[ICRC-21] Using cached consent data');
+      return {
+        consentRequest: cachedEntry.consentRequest,
+        certificate: cachedEntry.certificate
+      };
+    }
 
-    // Create actor for the target canister
-    const actor = Actor.createActor(createICRC21IDL, {
-      agent,
-      canisterId,
-    });
+    // Create or reuse an anonymous agent for fetching consent messages
+    const agentStartTime = performance.now();
+    let anonymousAgent: HttpAgent;
+    
+    if (!cachedAgent) {
+      const anonymousIdentity = new AnonymousIdentity();
+      cachedAgent = new HttpAgent({
+        identity: anonymousIdentity,
+        host: "https://icp0.io" // Will use default IC gateway
+      });
+    }
+    anonymousAgent = cachedAgent;
+    
+    const agentEndTime = performance.now();
+    console.log(`[ICRC-21] Agent creation/reuse took ${(agentEndTime - agentStartTime).toFixed(2)}ms`);
 
-    // Prepare the request with FieldsDisplay for Ledger
-    const request = {
-      method,
+    // Prepare the consent message request
+    const consentMessageArgs = {
       arg: Array.from(new Uint8Array(arg)),
+      method,
       user_preferences: {
         metadata: {
           language: "en",
@@ -254,21 +318,58 @@ export async function fetchConsentMessageForLedger(
       },
     };
 
-    // Call the consent message method
-    const response: any = await actor.icrc21_canister_call_consent_message(request);
+    // Encode the arguments for the ICRC-21 call
+    const argBuffer = IDL.encode([icrc21_consent_message_request], [consentMessageArgs]);
 
-    if (response.Ok) {
-      const consentInfo = response.Ok;
-      console.log('[ICRC-21] Successfully fetched consent info for Ledger:', consentInfo);
+    // Make the call using Agent directly to get access to internal response data
+    const icrc21ConsentMessageCall = {
+      methodName: "icrc21_canister_call_consent_message",
+      arg: argBuffer,
+      callSync: true,
+    };
 
-      // Extract just the consent_message part for Ledger
-      // The Ledger expects the consent message data, not the full info object
-      if (consentInfo.consent_message) {
-        return consentInfo.consent_message;
-      }
+    const callStartTime = performance.now();
+    const submitResponse = await anonymousAgent.call(
+      Principal.fromText(canisterId),
+      icrc21ConsentMessageCall
+    );
+    const callEndTime = performance.now();
+    console.log(`[ICRC-21] Network call took ${(callEndTime - callStartTime).toFixed(2)}ms`);
+
+    console.log('[ICRC-21] Submit response received:', submitResponse);
+
+    // Extract the consent request from the request details
+    const consentRequest = Buffer.from(_prepareCborForLedger(submitResponse.requestDetails)).toString('hex');
+
+    // Extract the certificate from the response body
+    const responseBody = submitResponse.response.body as any;
+    let certificate: string;
+    
+    if (responseBody && responseBody.certificate) {
+      certificate = Buffer.from(responseBody.certificate).toString('hex');
+    } else {
+      console.warn('[ICRC-21] No certificate found in response, using fallback');
+      certificate = '00';
     }
 
-    return null;
+    const endTime = performance.now();
+    console.log(`[ICRC-21] Total consent fetch took ${(endTime - startTime).toFixed(2)}ms`);
+    console.log('[ICRC-21] Successfully extracted consent data:', {
+      consentRequestLength: consentRequest.length,
+      certificateLength: certificate.length
+    });
+
+    // Cache the result
+    consentCache.set(cacheKey, {
+      consentRequest,
+      certificate,
+      timestamp: Date.now()
+    });
+
+    return {
+      consentRequest,
+      certificate
+    };
 
   } catch (error) {
     console.log('[ICRC-21] Failed to fetch consent message for Ledger:', error);

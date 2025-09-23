@@ -1,4 +1,21 @@
 // OKX Wallet Package for PNP
+
+// Initialize Buffer polyfill for browser environments
+import { Buffer } from 'buffer';
+
+// Extend window type for Buffer
+declare global {
+  interface Window {
+    Buffer?: typeof Buffer;
+    global?: Window;
+  }
+}
+
+if (typeof window !== 'undefined' && typeof window.Buffer === 'undefined') {
+  window.Buffer = Buffer;
+  window.global = window;
+}
+
 import { OkxMultiChainAdapter, type OkxMultiChainConfig } from './OkxMultiChainAdapter';
 import { createAdapterExtension } from '@windoge98/plug-n-play';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';

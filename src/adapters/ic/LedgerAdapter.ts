@@ -30,37 +30,64 @@ export const LedgerAdapterDefaults = {
 };
 
 /**
+ * Connection state for Ledger adapter
+ */
+interface LedgerConnectionState {
+  transport: Transport | null;
+  app: InternetComputerApp | null;
+  identity: LedgerIdentity | null;
+  agent: HttpAgent | null;
+  principal: string | null;
+}
+
+/**
  * Custom Identity implementation for Ledger hardware wallet
  */
 class LedgerIdentity implements Identity {
+  private readonly publicKeyDer: Uint8Array;
+  private readonly principal: Principal;
+  private readonly isDebugMode = typeof process !== 'undefined' && process.env.DEBUG === 'true';
+
   constructor(
-    private app: InternetComputerApp,
-    private derivationPath: string,
-    private publicKey: Secp256k1PublicKey
-  ) {}
+    private readonly app: InternetComputerApp,
+    private readonly derivationPath: string,
+    private readonly publicKey: Secp256k1PublicKey
+  ) {
+    // Pre-compute frequently used values
+    this.publicKeyDer = new Uint8Array(this.publicKey.toDer());
+    this.principal = Principal.selfAuthenticating(this.publicKeyDer);
+  }
 
   getPublicKey(): PublicKey {
     return this.publicKey;
   }
 
   getPrincipal(): Principal {
-    return Principal.selfAuthenticating(new Uint8Array(this.publicKey.toDer()));
+    return this.principal;
   }
 
 
   /**
-   * Create a read state request from a call request
+   * Fetch consent data with timeout for parallel processing
    */
-  private createReadStateRequest(callRequest: LedgerCallRequest): ReadRequest {
-    return {
-      request_type: 'read_state',
-      paths: [
-        [new TextEncoder().encode('request_status'), callRequest.request_id!]
-      ],
-      ingress_expiry: callRequest.ingress_expiry,
-      sender: callRequest.sender
-    } as ReadRequest;
+  private async fetchConsentWithTimeout(
+    canisterId: string,
+    method: string,
+    arg: ArrayBuffer
+  ): Promise<{ consentRequest: string; certificate: string } | null> {
+    try {
+      return await Promise.race([
+        fetchConsentMessageForLedger(canisterId, method, arg),
+        new Promise<null>((_, reject) =>
+          setTimeout(() => reject(new Error('ICRC-21 timeout')), 5000)
+        )
+      ]);
+    } catch {
+      return null;
+    }
   }
+
+
 
 
   /**
@@ -68,17 +95,10 @@ class LedgerIdentity implements Identity {
    */
   private getRequestType(request: LedgerRequest): RequestType {
     if (isCallRequest(request)) {
-      if (isTransferRequest(request)) {
-        return 'transfer';
-      } else if (request.method_name === 'icrc2_approve') {
-        return 'approve';
-      } else {
-        return 'call';
-      }
-    } else if (isReadRequest(request)) {
-      return 'read';
+      return isTransferRequest(request) ? 'transfer' :
+             request.method_name === 'icrc2_approve' ? 'approve' : 'call';
     }
-    return 'generic';
+    return isReadRequest(request) ? 'read' : 'generic';
   }
 
   /**
@@ -86,31 +106,20 @@ class LedgerIdentity implements Identity {
    */
   private async signWithBls(
     request: LedgerCallRequest,
-    consentData: any | null
+    consentData: { consentRequest: string; certificate: string } | null
   ): Promise<Buffer> {
-    // Encode the call request with content wrapper
-    const callCbor = Cbor.encode({ content: request });
-    const callMessage = Buffer.from(callCbor);
-
-    // Create a read_state request for checking the call status
-    const readStateRequest = this.createReadStateRequest(request);
-    const readStateCbor = Cbor.encode({ content: readStateRequest });
-    const readStateMessage = Buffer.from(readStateCbor);
-
-    // Prepare parameters for signBls (all must be non-empty hex strings)
-    // The consent data needs to be CBOR-encoded for Ledger
-    const consentRequest = consentData
-      ? Buffer.from(Cbor.encode(consentData)).toString('hex')
-      : '00'; // Single zero byte when no consent message
+    // Encode the call request with content wrapper (required for BLS signing)
+    const callMessage = Buffer.from(Cbor.encode({ content: request }));
     const canisterCall = callMessage.toString('hex');
-    const certificate = readStateMessage.toString('hex');
+    const consentRequest = consentData?.consentRequest || '00';
+    const certificate = consentData?.certificate || '00';
 
-    console.log('[LedgerIdentity] SignBls parameters:', {
-      hasConsentData: !!consentData,
-      consentLength: consentRequest.length,
-      callLength: canisterCall.length,
-      certificateLength: certificate.length
-    });
+    if (this.isDebugMode) {
+      console.log('[LedgerIdentity] SignBls params:', {
+        hasConsent: !!consentData,
+        callLen: canisterCall.length
+      });
+    }
 
     const blsResponse = await this.app.signBls(
       this.derivationPath,
@@ -136,12 +145,11 @@ class LedgerIdentity implements Identity {
    * Sign a request using regular sign method
    */
   private async signRegular(request: LedgerRequest): Promise<Buffer> {
-    // Encode the request with content wrapper
-    const cborRequest = Cbor.encode({ content: request });
-    const message = Buffer.from(cborRequest);
+    const message = Buffer.from(Cbor.encode({ content: request }));
 
-    console.log('[LedgerIdentity] Signing CBOR request, length:', message.length);
-    console.log('[LedgerIdentity] First 20 bytes:', message.subarray(0, 20).toString('hex'));
+    if (this.isDebugMode) {
+      console.log('[LedgerIdentity] CBOR request length:', message.length);
+    }
 
     const signResponse = await this.app.sign(this.derivationPath, message, 0x00);
 
@@ -161,6 +169,18 @@ class LedgerIdentity implements Identity {
    */
   private async signCbor(request: LedgerRequest): Promise<Signature> {
     const requestType = this.getRequestType(request);
+    const isCall = isCallRequest(request);
+    const shouldFetchConsent = isCall && !isTransferRequest(request) &&
+                                request.canister_id && request.method_name && request.arg;
+
+    // Start consent fetch in parallel for non-transfer calls
+    const consentPromise = shouldFetchConsent
+      ? this.fetchConsentWithTimeout(
+          request.canister_id!.toString(),
+          request.method_name!,
+          request.arg!
+        )
+      : null;
 
     // Show the modal
     const modal = getWalletModal();
@@ -178,39 +198,19 @@ class LedgerIdentity implements Identity {
     });
 
     try {
-      console.log('[LedgerIdentity] Request details:', {
-        request_type: request.request_type,
-        method_name: isCallRequest(request) ? request.method_name : undefined,
-        canister_id: isCallRequest(request) ? request.canister_id?.toString() : undefined
-      });
-
       // Determine signing strategy
       let rawSignature: Buffer;
 
       if (isCallRequest(request) && !isTransferRequest(request)) {
         // For non-transfer calls, use signBls with ICRC-21 support
-        console.log('[LedgerIdentity] Using signBls for non-transfer call');
-
-        // Attempt to fetch ICRC-21 consent data for Ledger
-        let consentData: any | null = null;
-        if (request.canister_id && request.method_name && request.arg) {
-          consentData = await fetchConsentMessageForLedger(
-            request.canister_id.toString(),
-            request.method_name,
-            request.arg
-          );
-        }
-
+        const consentData = consentPromise ? await consentPromise : null;
         rawSignature = await this.signWithBls(request, consentData);
       } else {
         // For transfers and read state requests, use regular sign
-        console.log('[LedgerIdentity] Using regular sign for', request.request_type);
         rawSignature = await this.signRegular(request);
       }
 
       modal.destroy();
-      console.log('[LedgerIdentity] Signature completed, length:', rawSignature.length);
-
       return rawSignature as unknown as Signature;
     } catch (error) {
       modal.destroy();
@@ -220,23 +220,13 @@ class LedgerIdentity implements Identity {
 
   async transformRequest(request: HttpAgentRequest): Promise<unknown> {
     const { body, ...rest } = request;
-
-    // Log the request type for debugging
-    console.log('[LedgerIdentity] Transform request for endpoint:', rest.endpoint);
-    const typedBody = body as LedgerRequest;
-    console.log('[LedgerIdentity] Request body type:', body ? typedBody.request_type : 'unknown');
-
-    // Get the public key DER for the sender
-    const sender_pubkey = this.publicKey.toDer();
-
-    // Sign the CBOR-encoded request body
-    const sender_sig = await this.signCbor(typedBody);
+    const sender_sig = await this.signCbor(body as LedgerRequest);
 
     return {
       ...rest,
       body: {
         content: body,
-        sender_pubkey,
+        sender_pubkey: this.publicKeyDer,
         sender_sig,
       },
     };
@@ -254,13 +244,16 @@ class LedgerIdentity implements Identity {
 export class LedgerAdapter extends BaseAdapter<LedgerAdapterConfig> {
   static supportedChains: Adapter.Chain[] = [Adapter.Chain.ICP];
 
-  private transport: Transport | null = null;
-  private app: InternetComputerApp | null = null;
-  private identity: LedgerIdentity | null = null;
-  private agent: HttpAgent | null = null;
+  private connection: LedgerConnectionState = {
+    transport: null,
+    app: null,
+    identity: null,
+    agent: null,
+    principal: null
+  };
   private derivationPath: string;
-  private principal: string | null = null;
   private transportTimeout: number;
+  private readonly isDebugMode = typeof process !== 'undefined' && process.env.DEBUG === 'true';
 
   constructor(args: AdapterConstructorArgs<LedgerAdapterConfig>) {
     super(args);
@@ -288,7 +281,8 @@ export class LedgerAdapter extends BaseAdapter<LedgerAdapterConfig> {
   }
 
   async isConnected(): Promise<boolean> {
-    return this.transport !== null && this.app !== null && this.identity !== null;
+    const { transport, app, identity } = this.connection;
+    return !!(transport && app && identity);
   }
 
   async openChannel(): Promise<void> {
@@ -297,30 +291,35 @@ export class LedgerAdapter extends BaseAdapter<LedgerAdapterConfig> {
       throw new Error("Ledger adapter requires a browser environment");
     }
 
-    // This method can be used to pre-load the transport library
-    // to avoid popup blocking issues in Safari
-    this.logger.info("[LedgerAdapter] Pre-loading transport library");
+    // Pre-loads transport library to avoid Safari popup blocking
+    if (this.isDebugMode) {
+      this.logger.info("[LedgerAdapter] Pre-loading transport library");
+    }
   }
 
   /**
    * Initialize Ledger transport and app
    */
   private async initializeLedgerDevice(): Promise<void> {
-    this.logger.info("[LedgerAdapter] Requesting device permission");
-    this.transport = await loadTransport(
+    const transport = await loadTransport(
       this.config.transport as 'WebHID' | 'WebUSB',
       this.transportTimeout
     );
 
-    this.app = await loadLedgerApp(this.transport);
+    const app = await loadLedgerApp(transport);
+    const version = await app.getVersion();
 
-    // Verify IC app is open
-    const version = await this.app.getVersion();
     if (version.returnCode !== LEDGER_RETURN_CODE.SUCCESS) {
+      await transport.close();
       throw new Error("Please open the Internet Computer app on your Ledger device");
     }
 
-    this.logger.info(`[LedgerAdapter] Connected to Ledger device - App version: ${version.major}.${version.minor}.${version.patch}`);
+    this.connection.transport = transport;
+    this.connection.app = app;
+
+    if (this.isDebugMode) {
+      this.logger.info(`[LedgerAdapter] Connected: v${version.major}.${version.minor}.${version.patch}`);
+    }
   }
 
   /**
@@ -338,13 +337,13 @@ export class LedgerAdapter extends BaseAdapter<LedgerAdapterConfig> {
       steps: [
         'Check your Ledger device screen',
         'Verify the principal address displayed',
-        'Press both buttons to confirm'
+        'Scroll to confirm'
       ],
       showSpinner: true
     });
 
     try {
-      const addressResponse = await this.app!.showAddressAndPubKey(this.derivationPath);
+      const addressResponse = await this.connection.app!.showAddressAndPubKey(this.derivationPath);
 
       if (addressResponse.returnCode !== LEDGER_RETURN_CODE.SUCCESS) {
         throw new Error(`Failed to get address from Ledger: ${addressResponse.errorMessage}`);
@@ -354,18 +353,16 @@ export class LedgerAdapter extends BaseAdapter<LedgerAdapterConfig> {
         throw new Error("No principal or public key returned from Ledger device");
       }
 
-      // Convert principal buffer to Principal object
-      const principal = Principal.fromUint8Array(new Uint8Array(addressResponse.principal));
-      const principalText = principal.toText();
+      const principalText = Principal.fromUint8Array(
+        new Uint8Array(addressResponse.principal)
+      ).toText();
 
-      // Create a Secp256k1PublicKey from the Ledger's raw public key
-      const publicKeyArrayBuffer = addressResponse.publicKey.buffer.slice(
-        addressResponse.publicKey.byteOffset,
-        addressResponse.publicKey.byteOffset + addressResponse.publicKey.byteLength
-      ) as ArrayBuffer;
-      const publicKey = Secp256k1PublicKey.fromRaw(publicKeyArrayBuffer);
-
-      this.logger.info(`[LedgerAdapter] Principal: ${principalText}`);
+      const publicKey = Secp256k1PublicKey.fromRaw(
+        addressResponse.publicKey.buffer.slice(
+          addressResponse.publicKey.byteOffset,
+          addressResponse.publicKey.byteOffset + addressResponse.publicKey.byteLength
+        ) as ArrayBuffer
+      );
 
       return { principal: principalText, publicKey };
     } finally {
@@ -377,18 +374,22 @@ export class LedgerAdapter extends BaseAdapter<LedgerAdapterConfig> {
    * Clean up resources on error or disconnect
    */
   private async cleanup(): Promise<void> {
-    if (this.transport) {
+    const { transport } = this.connection;
+
+    if (transport) {
       try {
-        await this.transport.close();
-      } catch (error) {
-        this.logger.error('[LedgerAdapter] Error closing transport:', error);
-      }
-      this.transport = null;
+        await transport.close();
+      } catch {}
     }
-    this.app = null;
-    this.identity = null;
-    this.agent = null;
-    this.principal = null;
+
+    this.connection = {
+      transport: null,
+      app: null,
+      identity: null,
+      agent: null,
+      principal: null
+    };
+
     this.actorCache.clear();
   }
 
@@ -405,16 +406,15 @@ export class LedgerAdapter extends BaseAdapter<LedgerAdapterConfig> {
 
       // Get address with user confirmation
       const { principal, publicKey } = await this.getAddressWithConfirmation();
-      this.principal = principal;
 
-      // Create the Ledger identity
-      this.identity = new LedgerIdentity(
-        this.app!,
+      // Create the Ledger identity and initialize agent
+      this.connection.principal = principal;
+      this.connection.identity = new LedgerIdentity(
+        this.connection.app!,
         this.derivationPath,
         publicKey
       );
 
-      // Initialize the agent with the Ledger identity
       await this.initAgent();
 
       this.setState(Adapter.Status.CONNECTED);
@@ -429,29 +429,29 @@ export class LedgerAdapter extends BaseAdapter<LedgerAdapterConfig> {
   }
 
   private async initAgent(): Promise<void> {
-    if (!this.identity) {
+    if (!this.connection.identity) {
       throw new Error("Identity not initialized");
     }
 
-    this.agent = await this.buildHttpAgent({ identity: this.identity });
+    this.connection.agent = await this.buildHttpAgent({ identity: this.connection.identity });
   }
 
   private createAccount(): Wallet.Account {
-    if (!this.principal) {
+    if (!this.connection.principal) {
       throw new Error("Principal not available");
     }
 
     return {
-      owner: this.principal,
+      owner: this.connection.principal,
       subaccount: null,
     };
   }
 
   async getPrincipal(): Promise<string> {
-    if (!this.principal) {
+    if (!this.connection.principal) {
       throw new Error("Not connected to Ledger device");
     }
-    return this.principal;
+    return this.connection.principal;
   }
 
   protected createActorInternal<T>(
@@ -459,11 +459,11 @@ export class LedgerAdapter extends BaseAdapter<LedgerAdapterConfig> {
     idl: any,
     _options?: { requiresSigning?: boolean }
   ): ActorSubclass<T> {
-    if (!this.agent) {
+    if (!this.connection.agent) {
       throw new Error("Agent not initialized. Please connect first.");
     }
 
-    return this.createActorWithAgent<T>(this.agent, canisterId, idl);
+    return this.createActorWithAgent<T>(this.connection.agent, canisterId, idl);
   }
 
   protected async disconnectInternal(): Promise<void> {
@@ -483,11 +483,11 @@ export class LedgerAdapter extends BaseAdapter<LedgerAdapterConfig> {
    * Public API method documented in demo
    */
   async showAddressOnDevice(): Promise<void> {
-    if (!this.app) {
+    if (!this.connection.app) {
       throw new Error("Not connected to Ledger device");
     }
 
-    const response = await this.app.showAddressAndPubKey(this.derivationPath);
+    const response = await this.connection.app.showAddressAndPubKey(this.derivationPath);
 
     if (response.returnCode !== LEDGER_RETURN_CODE.SUCCESS) {
       throw new Error(`Failed to show address on device: ${response.errorMessage}`);

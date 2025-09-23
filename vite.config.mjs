@@ -80,6 +80,7 @@ const packageConfigs = {
       "@solana/web3.js",
       "@solana/wallet-adapter-base",
       "bs58",
+      // Buffer bundled - not external
       /^@windoge98\//,
     ],
     formats: ["es", "cjs"],
@@ -108,7 +109,7 @@ const packageConfigs = {
       "@solana/wallet-adapter-base",
       "@solana/wallet-adapter-phantom",
       "bs58",
-      "buffer",
+      // Remove buffer from externals - bundle it instead
       /^@windoge98\//,
     ],
     formats: ["es", "cjs"],
@@ -137,7 +138,7 @@ const packageConfigs = {
       "@solana/wallet-adapter-base",
       "@solana/wallet-adapter-solflare",
       "bs58",
-      "buffer",
+      // Remove buffer from externals - bundle it instead
       /^@windoge98\//,
     ],
     formats: ["es", "cjs"],
@@ -166,7 +167,7 @@ const packageConfigs = {
       "@solana/wallet-adapter-base",
       "@solana/wallet-adapter-walletconnect",
       "bs58",
-      "buffer",
+      // Remove buffer from externals - bundle it instead
       /^@windoge98\//,
     ],
     formats: ["es", "cjs"],
@@ -195,7 +196,7 @@ const packageConfigs = {
       "@solana/wallet-adapter-base",
       "@solana/wallet-adapter-coinbase",
       "bs58",
-      "buffer",
+      // Remove buffer from externals - bundle it instead
       /^@windoge98\//,
     ],
     formats: ["es", "cjs"],
