@@ -81,7 +81,7 @@
   "author": "windoge98",
   "license": "MIT",
   "dependencies": {
-    "@dfinity/agent": "^2.4.1",
+    "@dfinity/agent": "^3.4.3",
     "@dfinity/auth-client": "2.4.1",
     "@dfinity/candid": "^2.4.1",
     "@dfinity/identity": "^2.4.1",
