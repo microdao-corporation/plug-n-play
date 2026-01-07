@@ -1,5 +1,5 @@
-import { Ed25519KeyIdentity, DelegationIdentity, DelegationChain } from "@dfinity/identity";
-import { Principal } from "@dfinity/principal";
+import { Ed25519KeyIdentity, DelegationIdentity, DelegationChain } from "@icp-sdk/core/identity";
+import { Principal } from "@icp-sdk/core/principal";
 import { BaseAdapter, AdapterConstructorArgs } from "./BaseAdapter";
 import { AdapterSpecificConfig } from "../types/AdapterConfigs";
 import { 

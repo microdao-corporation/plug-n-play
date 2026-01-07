@@ -1,4 +1,4 @@
-import { Actor, HttpAgent, ActorSubclass } from "@dfinity/agent";
+import { Actor, HttpAgent, ActorSubclass } from "@icp-sdk/core/agent";
 import { AdapterInterface, GetActorOptions } from "../types/AdapterTypes";
 import { GlobalPnpConfig } from "../types/index.d";
 import { fetchRootKeyIfNeeded } from "../utils";

@@ -2,7 +2,7 @@
 import { BaseAdapter, AdapterConstructorArgs } from './BaseAdapter';
 import { Adapter, Wallet } from '../types/index.d';
 import type { GlobalPnpConfig } from '../types/index.d';
-import { ActorSubclass } from '@dfinity/agent';
+import { ActorSubclass } from '@icp-sdk/core/agent';
 
 /**
  * Network detection result containing network information

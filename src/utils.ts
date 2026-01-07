@@ -1,5 +1,5 @@
-import { Principal } from "@dfinity/principal";
-import { ActorSubclass, HttpAgent, Actor, AnonymousIdentity, Identity } from "@dfinity/agent";
+import { Principal } from "@icp-sdk/core/principal";
+import { ActorSubclass, HttpAgent, Actor, AnonymousIdentity, Identity } from "@icp-sdk/core/agent";
 import { Adapter } from "./types/index.d";
 import { AccountIdentifier } from '@dfinity/ledger-icp';
 
@@ -13,7 +13,8 @@ import { AccountIdentifier } from '@dfinity/ledger-icp';
  * @private
  */
 function _deriveAccountId(principal: Principal): string {
-  const accountIdentifier = AccountIdentifier.fromPrincipal({ principal });
+  // AccountIdentifier expects @dfinity/principal, cast for compatibility
+  const accountIdentifier = AccountIdentifier.fromPrincipal({ principal: principal as any });
   return accountIdentifier.toHex();
 }
 

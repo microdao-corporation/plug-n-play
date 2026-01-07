@@ -1,4 +1,4 @@
-import { ActorSubclass } from '@dfinity/agent';
+import { ActorSubclass } from '@icp-sdk/core/agent';
 import { GlobalPnpConfig } from './types/index.d';
 import { AdapterConfig, GetActorOptions } from './types/AdapterTypes';
 import { WalletAccount } from './types/WalletTypes';

@@ -1,6 +1,6 @@
 // src/adapters/ic/IIAdapter.ts
 
-import { type ActorSubclass, Identity, HttpAgent } from "@dfinity/agent";
+import { type ActorSubclass, Identity, HttpAgent } from "@icp-sdk/core/agent";
 import { AuthClient } from "@dfinity/auth-client";
 // Note: AuthClientTransport is not needed as we'll use AuthClient directly
 import { type Wallet, Adapter } from "../../types/index.d";
@@ -113,7 +113,8 @@ export class IIAdapter extends BaseAdapter<IIAdapterConfig> implements Adapter.I
         const principal = identity?.getPrincipal();
         
         if (identity && principal && !principal.isAnonymous()) {
-          const account = await this.createAccountFromIdentity(identity);
+          // AuthClient returns @dfinity Identity, cast to @icp-sdk Identity for compatibility
+          const account = await this.createAccountFromIdentity(identity as unknown as Identity);
           this.setState(Adapter.Status.CONNECTED);
           return account;
         }
@@ -150,7 +151,8 @@ export class IIAdapter extends BaseAdapter<IIAdapterConfig> implements Adapter.I
         onSuccess: async () => {
           try {
             const identity = this.authClient!.getIdentity();
-            const account = await this.createAccountFromIdentity(identity);
+            // AuthClient returns @dfinity Identity, cast to @icp-sdk Identity for compatibility
+            const account = await this.createAccountFromIdentity(identity as unknown as Identity);
             this.setState(Adapter.Status.CONNECTED);
             resolve(account);
           } catch (error) {

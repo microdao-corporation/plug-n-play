@@ -3,8 +3,8 @@ import { BrowserExtensionTransport } from "@slide-computer/signer-extension";
 import { StoicTransport } from "@slide-computer/signer-transport-stoic";
 import { SignerAgent } from "@slide-computer/signer-agent";
 import { Signer } from "@slide-computer/signer";
-import { Principal } from "@dfinity/principal";
-import { HttpAgent } from "@dfinity/agent";
+import { Principal } from "@icp-sdk/core/principal";
+import { HttpAgent } from "@icp-sdk/core/agent";
 import { BaseSignerAdapter } from "../BaseSignerAdapter";
 import { AdapterConstructorArgs } from "../BaseAdapter";
 import { Adapter, Wallet } from "../../types/index.d";
@@ -206,7 +206,7 @@ export class UnifiedSignerAdapter extends BaseSignerAdapter<UnifiedSignerConfig>
     // Clean up signer
     if (this.signer) {
       try {
-        this.signer.closeChannel();
+        await this.signer.closeChannel();
       } catch (error) {
         // Best effort - already disposing
       }

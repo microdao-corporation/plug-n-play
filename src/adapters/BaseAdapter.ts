@@ -1,6 +1,6 @@
 // src/adapters/BaseAdapter.ts
 
-import { Actor, HttpAgent, type ActorSubclass, type Identity } from "@dfinity/agent";
+import { Actor, HttpAgent, type ActorSubclass, type Identity } from "@icp-sdk/core/agent";
 import { type Wallet, Adapter } from "../types/index.d";
 import { AdapterSpecificConfig } from "../types/AdapterConfigs";
 import {

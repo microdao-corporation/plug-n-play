@@ -1,5 +1,5 @@
-import { Principal } from "@dfinity/principal";
-import { Actor, HttpAgent, type ActorSubclass } from "@dfinity/agent";
+import { Principal } from "@icp-sdk/core/principal";
+import { Actor, HttpAgent, type ActorSubclass } from "@icp-sdk/core/agent";
 import { SignerAgent } from "@slide-computer/signer-agent";
 import { Signer } from "@slide-computer/signer";
 import { BaseAdapter, AdapterConstructorArgs } from "./BaseAdapter";
@@ -252,7 +252,7 @@ export abstract class BaseSignerAdapter<T extends AdapterSpecificConfig = Adapte
 
     if (this.signer) {
       try {
-        this.signer.closeChannel();
+        await this.signer.closeChannel();
       } catch (error) {
         this.handleError('Error closing signer channel', error);
       }
@@ -292,7 +292,7 @@ export abstract class BaseSignerAdapter<T extends AdapterSpecificConfig = Adapte
     // Clean up signer
     if (this.signer) {
       try {
-        this.signer.closeChannel();
+        await this.signer.closeChannel();
       } catch (error) {
         // Best effort - already disposing
       }

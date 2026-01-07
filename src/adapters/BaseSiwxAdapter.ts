@@ -1,7 +1,7 @@
 // src/adapters/BaseSiwxAdapter.ts
 
-import { Ed25519KeyIdentity, Delegation, DelegationChain, DelegationIdentity } from "@dfinity/identity";
-import { type ActorSubclass, type Identity } from "@dfinity/agent";
+import { Ed25519KeyIdentity, Delegation, DelegationChain, DelegationIdentity } from "@icp-sdk/core/identity";
+import { type ActorSubclass, type Identity } from "@icp-sdk/core/agent";
 import { BaseDelegationAdapter } from "./BaseDelegationAdapter";
 
 /**
@@ -32,26 +32,38 @@ export abstract class BaseSiwxAdapter<TConfig = any> extends BaseDelegationAdapt
   protected createDelegationIdentity(
     signedDelegation: any,
     sessionIdentity: Ed25519KeyIdentity,
-    userCanisterPublicKeyDer: ArrayBuffer,
+    userCanisterPublicKeyDer: ArrayBuffer | Uint8Array,
   ): DelegationIdentity {
+    const pubkeyBytes = signedDelegation.delegation.pubkey instanceof Uint8Array
+      ? signedDelegation.delegation.pubkey
+      : new Uint8Array(signedDelegation.delegation.pubkey);
+
     const delegation = new Delegation(
-      (signedDelegation.delegation.pubkey as Uint8Array).slice().buffer,
+      pubkeyBytes,
       signedDelegation.delegation.expiration,
       signedDelegation.delegation.targets?.length > 0
         ? signedDelegation.delegation.targets[0]
         : undefined,
     );
 
+    const signatureBytes = signedDelegation.signature instanceof Uint8Array
+      ? signedDelegation.signature
+      : new Uint8Array(signedDelegation.signature);
+
     const delegations = [
       {
         delegation,
-        signature: (signedDelegation.signature as Uint8Array).slice().buffer as any,
+        signature: signatureBytes,
       },
     ];
 
+    const publicKeyBytes = userCanisterPublicKeyDer instanceof Uint8Array
+      ? userCanisterPublicKeyDer
+      : new Uint8Array(userCanisterPublicKeyDer);
+
     const delegationChain = DelegationChain.fromDelegations(
       delegations,
-      new Uint8Array(userCanisterPublicKeyDer).buffer,
+      publicKeyBytes,
     );
 
     return DelegationIdentity.fromDelegation(sessionIdentity, delegationChain);
