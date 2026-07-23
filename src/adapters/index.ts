@@ -9,6 +9,7 @@ import nfidLogo from "../../assets/nfid.png";
 import dfinityLogo from "../../assets/dfinity.webp";
 import plugLogo from "../../assets/plug.webp";
 import stoicLogo from "../../assets/stoic.jpg";
+import computrLogo from "../../assets/computr.png";
 
 // Define IC-only adapters using unified signer adapter
 export const Adapters: Record<string, Adapter.Config> = {
@@ -98,6 +99,18 @@ export const Adapters: Record<string, Adapter.Config> = {
     config: {
       signerType: SignerType.PLUG,
       ...getDefaultTransportConfig(),
+    },
+  },
+  computr: {
+    id: "computr",
+    enabled: true,
+    walletName: "Computr",
+    logo: computrLogo,
+    website: "https://codeberg.org/bradyinfinity/computr",
+    chain: "ICP",
+    adapter: UnifiedSignerAdapter,
+    config: {
+      signerType: SignerType.COMPUTR,
     },
   },
 };

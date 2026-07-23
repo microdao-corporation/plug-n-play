@@ -116,4 +116,4 @@ export const isIIAdapterConfig = createTypeGuard<IIAdapterConfig>(
   "hostUrl"
 );
 export const isSiweAdapterConfig = createTypeGuard<SiweAdapterConfig>('siweProviderCanisterId');
-export const isStoicAdapterConfig = createTypeGuard<StoicAdapterConfig>('keyType'); 
+export const isStoicAdapterConfig = createTypeGuard<StoicAdapterConfig>('keyType');

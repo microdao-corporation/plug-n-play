@@ -256,9 +256,12 @@ export abstract class BaseSignerAdapter<T extends AdapterSpecificConfig = Adapte
       } catch (error) {
         this.handleError('Error closing signer channel', error);
       }
+      // Only clear the stored principal when a real session existed (signer was
+      // initialized). Skipping this when signer is null means a failed connect
+      // attempt (e.g. transport not found) won't wipe the stored principal and
+      // break auto-reconnect on the next page load.
+      storage.removeItem(this.principalStorageKey);
     }
-    // Clear stored principal on disconnect
-    storage.removeItem(this.principalStorageKey);
   }
 
   protected cleanupInternal(): void {
