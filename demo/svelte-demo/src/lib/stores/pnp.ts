@@ -34,10 +34,11 @@ const initPNP = () => {
             .withExtensions(PhantomExtension, SolflareExtension, WalletConnectExtension, MetaMaskExtension, RabbyExtension)
             .withIcAdapters()
             // Configure Plug wallet with account selection enabled (default)
-            .withAdapter('plug', { 
+            .withAdapter('plug', {
                 enabled: true,
                 // disableAccountSelection: false  // Uncomment to disable account selection UI
             })
+            .withAdapter('computr', { enabled: true })
             // Solana wallets
             .withAdapter('phantom', { enabled: true })
             .withAdapter('solflare', { enabled: true })
@@ -65,9 +66,10 @@ const initPNP = () => {
             if (account) {
                 isConnected.set(true);
                 principalId.set(account.owner);
+                subaccount.set(account.subaccount || null);
                 lastEvent.set({ type: 'reconnected', walletId: stored });
             }
-        }).catch(() => localStorage.removeItem('pnpConnectedWallet'));
+        }).catch((err) => { console.warn('[PNP auto-reconnect] failed for', stored, err); localStorage.removeItem('pnpConnectedWallet'); });
     }
     return pnp;
 };

@@ -193,6 +193,7 @@ declare global {
         principalId?: string;
         accountId?: string;
       };
+      computr?: any;
     };
   }
 }
